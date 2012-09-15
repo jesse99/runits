@@ -202,7 +202,7 @@ impl Value : ops::Mul<Value, Value>
 {
 	pure fn mul(rhs: Value) -> Value
 	{
-		Value {value: self.value*rhs.value, units: self.units*rhs.units}
+		Value {value: self.value * rhs.value, units: self.units*rhs.units}
 	}
 }
 
@@ -210,7 +210,17 @@ impl Value : ops::Div<Value, Value>
 {
 	pure fn div(rhs: Value) -> Value
 	{
-		Value {value: self.value/rhs.value, units: self.units/rhs.units}
+		Value {value: self.value / rhs.value, units: self.units/rhs.units}
+	}
+}
+
+// Modulus is lhs - (rhs * int(lhs/rhs)) so units is left unchanged.
+impl Value : ops::Modulo<Value, Value>
+{
+	pure fn modulo(rhs: Value) -> Value
+	{
+		check_identical_units(self.units, rhs.units, ~"modulo");
+		Value {value: self.value % rhs.value, units: self.units}
 	}
 }
 
@@ -219,7 +229,7 @@ impl Value : ops::Add<Value, Value>
 	pure fn add(rhs: Value) -> Value
 	{
 		check_identical_units(self.units, rhs.units, ~"add");
-		Value {value: self.value+rhs.value, units: self.units}
+		Value {value: self.value + rhs.value, units: self.units}
 	}
 }
 
@@ -228,7 +238,15 @@ impl Value : ops::Sub<Value, Value>
 	pure fn sub(rhs: Value) -> Value
 	{
 		check_identical_units(self.units, rhs.units, ~"sub");
-		Value {value: self.value-rhs.value, units: self.units}
+		Value {value: self.value - rhs.value, units: self.units}
+	}
+}
+
+impl Value : ops::Neg<Value>
+{
+	pure fn neg() -> Value
+	{
+		Value {value: -self.value, units: self.units}
 	}
 }
 
