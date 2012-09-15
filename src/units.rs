@@ -711,3 +711,19 @@ fn test_temperature_convert_to()
 	assert check_floats(x.value, 10.002265);
 	assert check_units(x.units, Celsius);
 }
+
+#[test]
+fn test_derived()
+{
+	let x = from_units(3.0, Liter).convert_to(Gallon);
+	assert check_floats(x.value, 0.79251616);
+	assert check_units(x.units, Gallon);
+}
+
+#[test]
+#[should_fail]
+fn test_incompaible_derived()
+{
+	let x = from_units(3.0, Hectare).convert_to(Gallon);
+	assert x.value > 0.0;
+}

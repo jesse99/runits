@@ -10,15 +10,25 @@
 Meter		1.0							Meter		m
 AU				1.49597870691e11	Meter		ua
 
+:area
+Hectare	10000.0	Meter*Meter	ha
+
+:volume
+Liter		0.001		Meter*Meter*Meter	L
+
 :mass
 Gram			1.0			Gram				g
 Tonne		1.0e6		Gram				t
 
+# month is the mean Gregorian month length
+# year is the astronomical year
 :time
 Second		1.0			Second			s
 Minute		60.0			Second			min
 Hour			3600.0		Second			h
 Day			86400.0	Second			d
+Month		2629746.0	Second		mo
+Year			31557600.0	Second		yr
 
 :electric_current
 Ampere		1.0			Ampere			A
@@ -41,6 +51,9 @@ Yard			0.9144		Meter			yd
 Mile			1609.344	Meter			mi
 NauticalMile		1852.0		Meter			nmi
 
+:volume
+Gallon		0.003785411784		Meter*Meter*Meter	gal
+
 :mass
 Dram			1.7718451953			Gram				dr
 Ounce		28.349523125			Gram				oz
@@ -51,8 +64,8 @@ Pound		453.59237				Gram				lb
 # (These are converted to canonical using a|b where a is
 # added to the unit which is then scaled by b).
 :temperature
-Celsius			273.15|1.0		Kelvin		C
-Fahrenheit	459.67|0.55556	Kelvin		F
+Celsius			273.15|1.0			Kelvin		C
+Fahrenheit		459.67|0.55556	Kelvin		F
 
 
 # Non-standard units

@@ -1,5 +1,5 @@
 // DO NOT EDIT: generated from units.in using gen_units.py
-export Unit, Yocto, Zepto, Atto, Femto, Pico, Nano, Micro, Milli, Centi, Deci, Hecto, Kilo, Mega, Giga, Tera, Peta, Exa, Zetta, Yotta, Kibi, Mebi, Gibi, Tebi, Pebi, Exbi, Kelvin, Celsius, Fahrenheit, Meter, AU, Inch, Feet, Yard, Mile, NauticalMile, Gram, Tonne, Dram, Ounce, Pound, Second, Minute, Hour, Day, Mole, Candela, Bit, Byte, Ampere, Compound;
+export Unit, Yocto, Zepto, Atto, Femto, Pico, Nano, Micro, Milli, Centi, Deci, Hecto, Kilo, Mega, Giga, Tera, Peta, Exa, Zetta, Yotta, Kibi, Mebi, Gibi, Tebi, Pebi, Exbi, Kelvin, Celsius, Fahrenheit, Hectare, Liter, Gallon, Meter, AU, Inch, Feet, Yard, Mile, NauticalMile, Gram, Tonne, Dram, Ounce, Pound, Second, Minute, Hour, Day, Month, Year, Mole, Candela, Bit, Byte, Ampere, Compound;
 export canonical_unit, is_modifier, unit_type, unit_abrev;	// these are really internal items
 
 /// Simple units are specified with one of the constructors (e.g. Meter).
@@ -40,6 +40,13 @@ enum Unit
 	Celsius,
 	Fahrenheit,
 	
+	// area
+	Hectare,
+	
+	// volume
+	Liter,
+	Gallon,
+	
 	// length
 	Meter,
 	AU,
@@ -61,6 +68,8 @@ enum Unit
 	Minute,
 	Hour,
 	Day,
+	Month,
+	Year,
 	
 	// amount_of_substance
 	Mole,
@@ -88,6 +97,13 @@ pure fn canonical_unit(u: Unit) -> (float, float, @[Unit])
 		Celsius			=> (273.15, 1.0, @[Kelvin]),
 		Fahrenheit			=> (459.67, 0.55556, @[Kelvin]),
 		
+		// area
+		Hectare			=> (0.0, 10000.0, @[Meter*Meter]),
+		
+		// volume
+		Liter			=> (0.0, 0.001, @[Meter*Meter*Meter]),
+		Gallon			=> (0.0, 0.003785411784, @[Meter*Meter*Meter]),
+		
 		// length
 		Meter			=> (0.0, 1.0, @[Meter]),
 		AU			=> (0.0, 1.49597870691e11, @[Meter]),
@@ -109,6 +125,8 @@ pure fn canonical_unit(u: Unit) -> (float, float, @[Unit])
 		Minute			=> (0.0, 60.0, @[Second]),
 		Hour			=> (0.0, 3600.0, @[Second]),
 		Day			=> (0.0, 86400.0, @[Second]),
+		Month			=> (0.0, 2629746.0, @[Second]),
+		Year			=> (0.0, 31557600.0, @[Second]),
 		
 		// amount_of_substance
 		Mole			=> (0.0, 1.0, @[Mole]),
@@ -170,9 +188,11 @@ pure fn unit_type(u: Unit) -> ~str
 	{
 		Yocto | Zepto | Atto | Femto | Pico | Nano | Micro | Milli | Centi | Deci | Hecto | Kilo | Mega | Giga | Tera | Peta | Exa | Zetta | Yotta | Kibi | Mebi | Gibi | Tebi | Pebi | Exbi => ~"",
 		Kelvin | Celsius | Fahrenheit => ~"temperature",
+		Hectare => ~"area",
+		Liter | Gallon => ~"volume",
 		Meter | AU | Inch | Feet | Yard | Mile | NauticalMile => ~"length",
 		Gram | Tonne | Dram | Ounce | Pound => ~"mass",
-		Second | Minute | Hour | Day => ~"time",
+		Second | Minute | Hour | Day | Month | Year => ~"time",
 		Mole => ~"amount_of_substance",
 		Candela => ~"luminous_intensity",
 		Bit | Byte => ~"bits",
@@ -217,6 +237,13 @@ pure fn unit_abrev(u: Unit) -> ~str
 		Celsius		=> ~"C",
 		Fahrenheit		=> ~"F",
 		
+		// area
+		Hectare		=> ~"ha",
+		
+		// volume
+		Liter		=> ~"L",
+		Gallon		=> ~"gal",
+		
 		// length
 		Meter		=> ~"m",
 		AU		=> ~"ua",
@@ -238,6 +265,8 @@ pure fn unit_abrev(u: Unit) -> ~str
 		Minute		=> ~"min",
 		Hour		=> ~"h",
 		Day		=> ~"d",
+		Month		=> ~"mo",
+		Year		=> ~"yr",
 		
 		// amount_of_substance
 		Mole		=> ~"mol",
