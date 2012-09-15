@@ -125,6 +125,10 @@ class WriteOutput(object):
 				self.__write_header(f)
 				self.__write_exports(f)
 				self.__write_enum(f)
+				self.__write_canonical_unit(f)
+				self.__write_is_modifier(f)
+				self.__write_unit_type(f)
+				self.__write_unit_abrev(f)
 		except Exception, e:
 			sys.stderr.write("Failed to write %s: %s.\n" % (options.dst, e))
 			if options.verbose >= 1:
@@ -136,12 +140,12 @@ class WriteOutput(object):
 	
 	def __write_exports(self, f):
 		f.write('export Unit')
-		
 		for units in self.__data.values():
 			for unit in units:
 				f.write(', %s' % unit.name)
-		f.write(', Compound')
-		f.write(';\n\n')
+		f.write(', Compound;\n')
+		f.write('export canonical_unit, is_modifier, unit_type, unit_abrev;	// these are really internal items\n')
+		f.write('\n')
 	
 	def __write_enum(self, f):
 		f.write('/// Simple units are specified with one of the constructors (e.g. Meter).\n')
@@ -155,11 +159,74 @@ class WriteOutput(object):
 			for unit in units:
 				f.write('	%s,\n' % unit.name)
 			f.write('	\n')
-		
 		f.write('	// compound\n')
 		f.write('	Compound(@[Unit], @[Unit]),	// numerator, denominator (which must be simple units)\n')
 		f.write('}\n')
-
+	
+	def __write_canonical_unit(self, f):
+		f.write('\n')
+		f.write('pure fn canonical_unit(u: Unit) -> (float, @[Unit])\n')
+		f.write('{\n')
+		f.write('	match u\n')
+		f.write('	{\n')
+		for kind, units in self.__data.items():
+			if kind != 'modifiers':
+				f.write('		// %s\n' % kind)
+				for unit in units:
+					f.write('		%s			=> (%s, @[%s]),\n' % (unit.name, unit.scaling, unit.canonical))
+				f.write('		\n')
+		f.write('		// modifiers\n')
+		for unit in self.__data['modifiers']:
+			f.write('		%s			=> (%s, @[]),\n' % (unit.name, unit.scaling))
+		f.write('		\n')
+		f.write('		// compound\n')
+		f.write('		Compound(*)	=> fail fmt!("Expected a simple unit but found %?", u),\n')
+		f.write('	}\n')
+		f.write('}\n')
+	
+	def __write_is_modifier(self, f):
+		f.write('\n')
+		f.write('pure fn is_modifier(u: Unit) -> bool\n')
+		f.write('{\n')
+		f.write('	match u\n')
+		f.write('	{\n')
+		f.write('		%s => true,\n' % ' | '.join(map(lambda u: u.name, self.__data['modifiers'])))
+		f.write('		_ => false,\n')
+		f.write('	}\n')
+		f.write('}\n')
+	
+	def __write_unit_type(self, f):
+		f.write('\n')
+		f.write('pure fn unit_type(u: Unit) -> ~str\n')
+		f.write('{\n')
+		f.write('	match u\n')
+		f.write('	{\n')
+		for kind, units in self.__data.items():
+			names = ' | '.join(map(lambda u: u.name, units))
+			if kind != 'modifiers':
+				f.write('		%s => ~"%s",\n' % (names, kind))
+			else:
+				f.write('		%s => ~"",\n' % names)
+		f.write('		Compound(*) => fail fmt!("unit_type should only be called with simple units, not %?", u),\n')
+		f.write('	}\n')
+		f.write('}\n')
+	
+	def __write_unit_abrev(self, f):
+		f.write('\n')
+		f.write('pure fn unit_abrev(u: Unit) -> ~str\n')
+		f.write('{\n')
+		f.write('	match u\n')
+		f.write('	{\n')
+		for kind, units in self.__data.items():
+			f.write('		// %s\n' % kind)
+			for unit in units:
+				f.write('		%s => ~"%s",\n' % (unit.name, unit.abrev))
+			f.write('		\n')
+		f.write('		// compound\n')
+		f.write('		Compound(*)	=> fail fmt!("unit_abrev should only be called with simple units, not %?", u),\n')
+		f.write('	}\n')
+		f.write('}\n')
+	
 parser = argparse.ArgumentParser(description = "Generates rust code for units.")
 parser.add_argument("--verbose", "-v", action='count', help = 'print extra information')
 parser.add_argument("--in", metavar = "FILE", required = True, dest = "src", help = "path to a file describing the units")

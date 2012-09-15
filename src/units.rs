@@ -4,7 +4,7 @@ use core::ops::*;
 use generated::*;
 
 export Value;
-	
+
 // ---- Unit ----------------------------------------------------------------------------
 impl Unit
 {
@@ -383,70 +383,6 @@ fn increment_type(numer: hashmap<@~str, uint>, denom: hashmap<@~str, uint>, u: U
 			for d.each |v| {increment(denom, v)}
 		}
 		_ => {increment(numer, u)}
-	}
-}
-
-pure fn canonical_unit(u: Unit) -> (float, @[Unit])
-{
-	match u
-	{
-		// length
-		Meter			=> (1.0, @[Meter]),
-		Feet			=> (0.3048, @[Meter]),
-		
-		// time
-		Second			=> (1.0, @[Second]),
-		Minute			=> (60.0, @[Second]),
-		
-		// modifiers
-		Micro			=> (1.0e-6, @[]),
-		Milli			=> (1.0e-3, @[]),
-		Kilo			=> (1.0e3, @[]),
-		
-		// compound
-		Compound(*)	=> fail fmt!("Expected a simple unit but found %?", u),
-	}
-}
-
-pure fn is_modifier(u: Unit) -> bool
-{
-	match u
-	{
-		Micro | Milli | Kilo	=> true,
-		_					=> false,
-	}
-}
-
-pure fn unit_type(u: Unit) -> ~str
-{
-	match u
-	{
-		Meter | Feet			=> ~"length",
-		Second | Minute		=> ~"time",
-		Micro | Milli | Kilo		=> ~"",
-		Compound(*)			=> fail fmt!("unit_type should only be called with simple units, not %?", u),
-	}
-}
-
-pure fn unit_abrev(u: Unit) -> ~str
-{
-	match u
-	{
-		// length
-		Meter		=> ~"m",
-		Feet		=> ~"ft",
-		
-		// time
-		Second		=> ~"s",
-		Minute		=> ~"min",
-		
-		// modifiers
-		Micro		=> ~"u",
-		Milli		=> ~"m",
-		Kilo		=> ~"k",
-		
-		// compound
-		Compound(*)	=> fail fmt!("unit_abrev should only be called with simple units, not %?", u),
 	}
 }
 
