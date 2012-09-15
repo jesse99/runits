@@ -1,42 +1,11 @@
 use io::WriterUtil;
 use std::map::*;
 use core::ops::*;
+use generated::*;
 
-export Unit, Meter, Feet, Second, Minute, Micro, Milli, Kilo, Compound,
-	Value;
+export Value;
 	
-//# name		scaling 	canonical	abrev		(name*scaling == canonical)
-//length:
-//Meter		1.0			Meter		"m"
-//Feet		0.3048		Meter		"ft"
-//
-//modifiers:
-//Kilo		1.0e3		Modifier	"k"
-
 // ---- Unit ----------------------------------------------------------------------------
-/// Simple units are specified with one of the constructors (e.g. Meter).
-/// Compound units are constructed using multiplication and division
-/// (e.g. Meter/(Second*Second)). Dimensionless units are empty Compound
-/// units.
-enum Unit
-{
-	// length
-	Meter,
-	Feet,
-	
-	// time
-	Second,
-	Minute,
-	
-	// modifiers
-	Micro,
-	Milli,
-	Kilo,
-	
-	// compound
-	Compound(@[Unit], @[Unit]),	// numerator, denominator (which must be simple units)
-}
-
 impl Unit
 {
 	pure fn is_dimensionless() -> bool
@@ -671,24 +640,3 @@ fn test_value_to_str()
 	let x = from_number(10.0)/from_units(5.0, Meter*Meter);
 	assert check_strings(x.to_str(), ~"2 m^-2");
 }
-
-// TODO:
-// start using Python to generate items
-//	enum first
-// 	commit the generated code
-//	see if include! will work (gives us control over visiblity)
-//	if so, ticket "expression" language
-//	if not, ticket a request for a better include!
-//	then each function, one by one
-// support comparisons (need commensurate check)
-// support plus/minus (need commensurate check)
-// support modulo (need commensurate check)
-// support neg
-// maybe turn this into a project
-// add support for more units
-//    SI units
-//    IEC binary prefixes
-//    imperial units
-// maybe add an example (unit test)
-// 	could include it in the readme
-// add to cargo

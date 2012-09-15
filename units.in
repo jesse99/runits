@@ -1,0 +1,15 @@
+# name		scaling 	canonical	abrev		(name*scaling == canonical)
+  
+:length
+Meter		1.0			Meter			m
+Feet			0.3048		Meter			ft
+
+:time
+Second		1.0			Second			s
+Minute		60.0			Second			min
+
+:modifiers
+Micro		1.0e-6		Modifier		u
+Milli		1.0e-3		Modifier		m
+Kilo			1.0e3		Modifier		k
+

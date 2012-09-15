@@ -15,10 +15,5 @@
 
 use std;
 
+mod generated;
 mod units;
-
-//#[cfg(test)]
-//mod tests
-//{
-//	mod test_data;
-//}
