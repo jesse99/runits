@@ -55,6 +55,12 @@ Celsius			273.15|1.0		Kelvin		C
 Fahrenheit	459.67|0.55556	Kelvin		F
 
 
+# Non-standard units
+:bits
+Bit			1.0		Bit		b
+Byte			8.0		Bit		B
+
+
 # Modifiers from http://en.wikipedia.org/wiki/Metric_prefix
 :modifiers
 Yocto		1.0e-24	Modifier		y

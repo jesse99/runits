@@ -1,5 +1,5 @@
 // DO NOT EDIT: generated from units.in using gen_units.py
-export Unit, Yocto, Zepto, Atto, Femto, Pico, Nano, Micro, Milli, Centi, Deci, Hecto, Kilo, Mega, Giga, Tera, Peta, Exa, Zetta, Yotta, Kibi, Mebi, Gibi, Tebi, Pebi, Exbi, Kelvin, Celsius, Fahrenheit, Meter, AU, Inch, Feet, Yard, Mile, NauticalMile, Gram, Tonne, Dram, Ounce, Pound, Second, Minute, Hour, Day, Mole, Candela, Ampere, Compound;
+export Unit, Yocto, Zepto, Atto, Femto, Pico, Nano, Micro, Milli, Centi, Deci, Hecto, Kilo, Mega, Giga, Tera, Peta, Exa, Zetta, Yotta, Kibi, Mebi, Gibi, Tebi, Pebi, Exbi, Kelvin, Celsius, Fahrenheit, Meter, AU, Inch, Feet, Yard, Mile, NauticalMile, Gram, Tonne, Dram, Ounce, Pound, Second, Minute, Hour, Day, Mole, Candela, Bit, Byte, Ampere, Compound;
 export canonical_unit, is_modifier, unit_type, unit_abrev;	// these are really internal items
 
 /// Simple units are specified with one of the constructors (e.g. Meter).
@@ -68,6 +68,10 @@ enum Unit
 	// luminous_intensity
 	Candela,
 	
+	// bits
+	Bit,
+	Byte,
+	
 	// electric_current
 	Ampere,
 	
@@ -111,6 +115,10 @@ pure fn canonical_unit(u: Unit) -> (float, float, @[Unit])
 		
 		// luminous_intensity
 		Candela			=> (0.0, 1.0, @[Candela]),
+		
+		// bits
+		Bit			=> (0.0, 1.0, @[Bit]),
+		Byte			=> (0.0, 8.0, @[Bit]),
 		
 		// electric_current
 		Ampere			=> (0.0, 1.0, @[Ampere]),
@@ -167,6 +175,7 @@ pure fn unit_type(u: Unit) -> ~str
 		Second | Minute | Hour | Day => ~"time",
 		Mole => ~"amount_of_substance",
 		Candela => ~"luminous_intensity",
+		Bit | Byte => ~"bits",
 		Ampere => ~"electric_current",
 		Compound(*) => fail fmt!("unit_type should only be called with simple units, not %?", u),
 	}
@@ -235,6 +244,10 @@ pure fn unit_abrev(u: Unit) -> ~str
 		
 		// luminous_intensity
 		Candela		=> ~"cd",
+		
+		// bits
+		Bit		=> ~"b",
+		Byte		=> ~"B",
 		
 		// electric_current
 		Ampere		=> ~"A",
