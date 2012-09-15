@@ -374,16 +374,16 @@ pure fn to_canonical(x: Value) -> Value
 	for numer.each
 	|u|
 	{
-		let (scaling, v) = canonical_unit(u);
-		rvalue = rvalue*scaling;
+		let (offset, scaling, v) = canonical_unit(u);
+		rvalue = (rvalue + offset)*scaling;
 		rnumer += v;
 	}
 	
 	for denom.each
 	|u|
 	{
-		let (scaling, v) = canonical_unit(u);
-		rvalue = rvalue*(1.0/scaling);
+		let (offset, scaling, v) = canonical_unit(u);
+		rvalue = rvalue*(1.0/scaling) - offset;
 		rdenom += v;
 	}
 	
@@ -406,16 +406,16 @@ pure fn from_canonical(x: float, u: Unit) -> Value
 	for numer.each
 	|u|
 	{
-		let (scaling, _v) = canonical_unit(u);
-		rvalue = rvalue*(1.0/scaling);
+		let (offset, scaling, _v) = canonical_unit(u);
+		rvalue = rvalue*(1.0/scaling) - offset;
 		rnumer += @[u];
 	}
 	
 	for denom.each
 	|u|
 	{
-		let (scaling, _v) = canonical_unit(u);
-		rvalue = rvalue*scaling;
+		let (offset, scaling, _v) = canonical_unit(u);
+		rvalue = (rvalue + offset)*scaling;
 		rdenom += @[u];
 	}
 	
@@ -698,4 +698,16 @@ fn test_incompatible_add()
 	let y = from_units(2.0, Meter);
 	let z = x + y;
 	assert z.value > 0.0;
+}
+
+#[test]
+fn test_temperature_convert_to()
+{
+	let x = from_units(42.0, Celsius).convert_to(Fahrenheit);
+	assert check_floats(x.value, 107.595462);
+	assert check_units(x.units, Fahrenheit);
+	
+	let x = from_units(50.0, Fahrenheit).convert_to(Celsius);
+	assert check_floats(x.value, 10.002265);
+	assert check_units(x.units, Celsius);
 }

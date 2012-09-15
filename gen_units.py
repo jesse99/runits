@@ -165,7 +165,7 @@ class WriteOutput(object):
 	
 	def __write_canonical_unit(self, f):
 		f.write('\n')
-		f.write('pure fn canonical_unit(u: Unit) -> (float, @[Unit])\n')
+		f.write('pure fn canonical_unit(u: Unit) -> (float, float, @[Unit])\n')
 		f.write('{\n')
 		f.write('	match u\n')
 		f.write('	{\n')
@@ -173,11 +173,18 @@ class WriteOutput(object):
 			if kind != 'modifiers':
 				f.write('		// %s\n' % kind)
 				for unit in units:
-					f.write('		%s			=> (%s, @[%s]),\n' % (unit.name, unit.scaling, unit.canonical))
+					parts = unit.scaling.split('|')
+					if len(parts) == 1:
+						offset = 0.0
+						scaling = parts[0]
+					else:
+						offset = parts[0]
+						scaling = parts[1]
+					f.write('		%s			=> (%s, %s, @[%s]),\n' % (unit.name, offset, scaling, unit.canonical))
 				f.write('		\n')
 		f.write('		// modifiers\n')
 		for unit in self.__data['modifiers']:
-			f.write('		%s			=> (%s, @[]),\n' % (unit.name, unit.scaling))
+			f.write('		%s			=> (0.0, %s, @[]),\n' % (unit.name, unit.scaling))
 		f.write('		\n')
 		f.write('		// compound\n')
 		f.write('		Compound(*)	=> fail fmt!("Expected a simple unit but found %?", u),\n')
@@ -220,7 +227,7 @@ class WriteOutput(object):
 		for kind, units in self.__data.items():
 			f.write('		// %s\n' % kind)
 			for unit in units:
-				f.write('		%s => ~"%s",\n' % (unit.name, unit.abrev))
+				f.write('		%s		=> ~"%s",\n' % (unit.name, unit.abrev))
 			f.write('		\n')
 		f.write('		// compound\n')
 		f.write('		Compound(*)	=> fail fmt!("unit_abrev should only be called with simple units, not %?", u),\n')

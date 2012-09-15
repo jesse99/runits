@@ -1,7 +1,7 @@
 # name		scaling 	canonical	abrev		(name*scaling == canonical)
 
 # SI units from http://en.wikipedia.org/wiki/SI and
-# http://en.wikipedia.org/wiki/Non-SI_units_accepted_for_use_with_SI.
+# http://en.wikipedia.org/wiki/Non-SI_units_accepted_for_use_with_SI
 # TODO: If constants become more capable could add
 # units from http://en.wikipedia.org/wiki/SI_derived_units
 # and some from http://en.wikipedia.org/wiki/Non-SI_units_accepted_for_use_with_SI.
@@ -48,11 +48,11 @@ Pound		453.59237				Gram				lb
 
 
 # Temperature units from http://en.wikipedia.org/wiki/Temperature_conversion
-# (These are not canonicalized using a simple scale factor
-# so they are special cased).
+# (These are converted to canonical using a|b where a is
+# added to the unit which is then scaled by b).
 :temperature
-Celsius			1.0		Kelvin		C
-Fahrenheit	1.0		Kelvin		F
+Celsius			273.15|1.0		Kelvin		C
+Fahrenheit	459.67|0.55556	Kelvin		F
 
 
 # Modifiers from http://en.wikipedia.org/wiki/Metric_prefix
