@@ -1,0 +1,24 @@
+//! Dimensional analysis library
+#[link(name = "runits", vers = "0.1", uuid = "DA082E17-59F4-49A2-BFC2-CAAA1D0B7C94")];
+#[crate_type = "lib"];
+
+#[author = "Jesse Jones"];
+#[license = "MIT"];
+
+#[warn(non_camel_case_types)]; 
+#[warn(implicit_copies)];
+#[warn(non_implicitly_copyable_typarams)];
+#[allow(deprecated_mode)];			// TODO: enable this
+#[warn(deprecated_pattern)];
+#[warn(unused_imports)];
+#[allow(structural_records)];			// TODO: enable this
+
+use std;
+
+mod units;
+
+//#[cfg(test)]
+//mod tests
+//{
+//	mod test_data;
+//}
