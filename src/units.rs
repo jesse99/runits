@@ -17,7 +17,7 @@ export Unit, Meter, Feet, Second, Minute, Micro, Milli, Kilo, Compound,
 /// Simple units are specified with one of the constructors (e.g. Meter).
 /// Compound units are constructed using multiplication and division
 /// (e.g. Meter/(Second*Second)). Dimensionless units are empty Compound
-/// units. 
+/// units.
 enum Unit
 {
 	// length
