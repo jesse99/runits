@@ -10,7 +10,7 @@ check: bin/test-runits
 	export RUST_LOG=runits=1 && ./bin/test-runits
 
 check1: bin/test-runits
-	export RUST_LOG=runits=2 && ./bin/test-runits test_div_unit
+	export RUST_LOG=runits=2 && ./bin/test-runits test_incommensurable_ne
 
 # ------------------
 # Binary targets 

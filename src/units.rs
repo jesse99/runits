@@ -157,14 +157,14 @@ impl Unit : cmp::Eq
 // ---- Value ---------------------------------------------------------------------------
 /// Values are numbers represented in an arbitrary unit. They support
 /// the standard arithmetic operations and fail is called if the units are
-/// incommensurable (e.g. if meters are added to seconds).
+/// incompatible (e.g. if meters are added to seconds).
 ///
 /// Note that units are converted to different units only when explicitly
 /// directed to do so (e.g. via convert_to). 
 struct Value
 {
 	pub value: float,
-	priv units: Unit,		// private so that we can enforce the invariant that Compound units only contain simple units, and that units are canceled properly
+	pub units: Unit,		// public so users have more control over stuff like to_str
 }
 
 /// Creates a dimensionless value.
@@ -192,7 +192,7 @@ impl Value
 {
 	fn convert_to(to: Unit) -> Value
 	{
-		check_commensurable(self.units, to, ~"convert_to");
+		check_commensurable_units(self.units, to, ~"convert_to");
 		let c = to_canonical(self);
 		from_canonical(c.value, to)
 	}
@@ -211,6 +211,66 @@ impl Value : ops::Div<Value, Value>
 	pure fn div(rhs: Value) -> Value
 	{
 		Value {value: self.value/rhs.value, units: self.units/rhs.units}
+	}
+}
+
+impl Value : ops::Add<Value, Value>
+{
+	pure fn add(rhs: Value) -> Value
+	{
+		check_identical_units(self.units, rhs.units, ~"add");
+		Value {value: self.value+rhs.value, units: self.units}
+	}
+}
+
+impl Value : ops::Sub<Value, Value>
+{
+	pure fn sub(rhs: Value) -> Value
+	{
+		check_identical_units(self.units, rhs.units, ~"sub");
+		Value {value: self.value-rhs.value, units: self.units}
+	}
+}
+
+impl Value : cmp::Ord
+{
+	pure fn lt(&&rhs: Value) -> bool
+	{
+		check_identical_units(self.units, rhs.units, ~"lt");
+		self.value < rhs.value
+	}
+	
+	pure fn le(&&rhs: Value) -> bool
+	{
+		check_identical_units(self.units, rhs.units, ~"le");
+		self.value <= rhs.value
+	}
+	
+	pure fn ge(&&rhs: Value) -> bool
+	{
+		check_identical_units(self.units, rhs.units, ~"ge");
+		self.value >= rhs.value
+	}
+	
+	pure fn gt(&&rhs: Value) -> bool
+	{
+		check_identical_units(self.units, rhs.units, ~"gt");
+		self.value > rhs.value
+	}
+}
+
+impl Value : cmp::Eq
+{
+	pure fn eq(&&rhs: Value) -> bool
+	{
+		check_identical_units(self.units, rhs.units, ~"eq");
+		self.value == rhs.value
+	}
+	
+	pure fn ne(&&rhs: Value) -> bool
+	{
+		check_identical_units(self.units, rhs.units, ~"ne");
+		self.value != rhs.value
 	}
 }
 
@@ -344,45 +404,61 @@ pure fn from_canonical(x: float, u: Unit) -> Value
 	from_units(rvalue, Compound(rnumer, rdenom))
 }
 
-fn check_commensurable(lhs: Unit, rhs: Unit, fname: &str)
+// Fails if the units are different.
+pure fn check_identical_units(lhs: Unit, rhs: Unit, fname: &str)
 {
-	let numer1 = box_str_hash();
-	let denom1 = box_str_hash();
-	increment_type(numer1, denom1, lhs);
-	
-	let numer2 = box_str_hash();
-	let denom2 = box_str_hash();
-	increment_type(numer2, denom2, rhs);
-	
-	if numer1 != numer2 || denom1 != denom2
-	{
-		fail fmt!("incommensurable units for `%s`.%s(`%s`)", lhs.to_str(), fname, rhs.to_str());
-	}
+	pure fn unit_name(u: Unit) -> ~str {fmt!("%?", u)}
+	check_compatible_units(lhs, rhs, fname, unit_name)
 }
 
-fn increment_type(numer: hashmap<@~str, uint>, denom: hashmap<@~str, uint>, u: Unit)
+// Fails if the unit kinds are different.
+pure fn check_commensurable_units(lhs: Unit, rhs: Unit, fname: &str)
 {
-	fn increment(table: hashmap<@~str, uint>, u: Unit)
+	check_compatible_units(lhs, rhs, fname, unit_type)
+}
+
+pure fn check_compatible_units(lhs: Unit, rhs: Unit, fname: &str, kind: fn@ (u: Unit) -> ~str)
+{
+	fn increment_type(numer: hashmap<@~str, uint>, denom: hashmap<@~str, uint>, u: Unit, kind: fn@ (u: Unit) -> ~str)
 	{
-		let key = @unit_type(u);
-		if key.is_not_empty()
+		fn increment(table: hashmap<@~str, uint>, u: Unit, kind: fn@ (u: Unit) -> ~str)
 		{
-			match table.find(key)
+			let key = @kind(u);
+			if key.is_not_empty()
 			{
-				option::Some(count)	=> table.insert(key, count + 1),
-				option::None			=> table.insert(key, 1),
-			};
+				match table.find(key)
+				{
+					option::Some(count)	=> table.insert(key, count + 1),
+					option::None			=> table.insert(key, 1),
+				};
+			}
+		}
+		
+		match u
+		{
+			Compound(n, d)	=>
+			{
+				for n.each |v| {increment(numer, v, kind)}
+				for d.each |v| {increment(denom, v, kind)}
+			}
+			_ => {increment(numer, u, kind)}
 		}
 	}
 	
-	match u
+	unchecked
 	{
-		Compound(n, d)	=>
+		let numer1 = box_str_hash();
+		let denom1 = box_str_hash();
+		increment_type(numer1, denom1, lhs, kind);
+		
+		let numer2 = box_str_hash();
+		let denom2 = box_str_hash();
+		increment_type(numer2, denom2, rhs, kind);
+		
+		if numer1 != numer2 || denom1 != denom2
 		{
-			for n.each |v| {increment(numer, v)}
-			for d.each |v| {increment(denom, v)}
+			fail fmt!("incompatible units for `%s`.%s(`%s`)", lhs.to_str(), fname, rhs.to_str());
 		}
-		_ => {increment(numer, u)}
 	}
 }
 
@@ -575,4 +651,33 @@ fn test_value_to_str()
 	
 	let x = from_number(10.0)/from_units(5.0, Meter*Meter);
 	assert check_strings(x.to_str(), ~"2 m^-2");
+}
+
+#[test]
+#[should_fail]
+fn test_incompatible_lt()
+{
+	let x = from_units(5.0, Feet);
+	let y = from_units(2.0, Second);
+	assert x < y;
+}
+
+#[test]
+fn test_value_add()
+{
+	let x = from_units(5.0, Meter);
+	let y = from_units(3.0, Meter);
+	let z = x + y;
+	assert check_floats(z.value, 8.0);
+	assert check_units(z.units, Meter);
+}
+
+#[test]
+#[should_fail]
+fn test_incompatible_add()
+{
+	let x = from_units(5.0, Feet);
+	let y = from_units(2.0, Meter);
+	let z = x + y;
+	assert z.value > 0.0;
 }
