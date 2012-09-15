@@ -1,15 +1,88 @@
 # name		scaling 	canonical	abrev		(name*scaling == canonical)
-  
+
+# SI units from http://en.wikipedia.org/wiki/SI and
+# http://en.wikipedia.org/wiki/Non-SI_units_accepted_for_use_with_SI.
+# TODO: If constants become more capable could add
+# units from http://en.wikipedia.org/wiki/SI_derived_units
+# and some from http://en.wikipedia.org/wiki/Non-SI_units_accepted_for_use_with_SI.
+# In the interim users can define locals for them.
 :length
-Meter		1.0			Meter			m
-Feet			0.3048		Meter			ft
+Meter		1.0							Meter		m
+AU				1.49597870691e11	Meter		ua
+
+:mass
+Gram			1.0			Gram				g
+Tonne		1.0e6		Gram				t
 
 :time
 Second		1.0			Second			s
 Minute		60.0			Second			min
+Hour			3600.0		Second			h
+Day			86400.0	Second			d
 
+:electric_current
+Ampere		1.0			Ampere			A
+
+:temperature
+Kelvin		1.0			Kelvin			K
+
+:luminous_intensity
+Candela	1.0			Candela		cd
+
+:amount_of_substance
+Mole			1.0			Mole				mol
+
+
+# USA customary units from http://en.wikipedia.org/wiki/United_States_customary_units
+:length
+Inch			0.0254		Meter			in
+Feet			0.3048		Meter			ft
+Yard			0.9144		Meter			yd
+Mile			1609.344	Meter			mi
+NauticalMile		1852.0		Meter			nmi
+
+:mass
+Dram			1.7718451953			Gram				dr
+Ounce		28.349523125			Gram				oz
+Pound		453.59237				Gram				lb
+
+
+# Temperature units from http://en.wikipedia.org/wiki/Temperature_conversion
+# (These are not canonicalized using a simple scale factor
+# so they are special cased).
+:temperature
+Celsius			1.0		Kelvin		C
+Fahrenheit	1.0		Kelvin		F
+
+
+# Modifiers from http://en.wikipedia.org/wiki/Metric_prefix
 :modifiers
+Yocto		1.0e-24	Modifier		y
+Zepto		1.0e-21	Modifier		z
+Atto			1.0e-18	Modifier		a
+Femto		1.0e-15	Modifier		f
+Pico			1.0e-12	Modifier		p
+Nano			1.0e-9		Modifier		n
 Micro		1.0e-6		Modifier		u
 Milli		1.0e-3		Modifier		m
+Centi		1.0e-2		Modifier		c
+Deci			1.0e-1		Modifier		d
+Hecto		1.0e2		Modifier		h
 Kilo			1.0e3		Modifier		k
+Mega			1.0e6		Modifier		M
+Giga			1.0e9		Modifier		G
+Tera			1.0e12		Modifier		T
+Peta			1.0e15		Modifier		P
+Exa			1.0e18		Modifier		E
+Zetta		1.0e21		Modifier		Z
+Yotta		1.0e24		Modifier		Y
 
+
+# Binary modifiers from http://en.wikipedia.org/wiki/Binary_prefix
+:modifiers
+Kibi		1024.0									Modifier		Ki
+Mebi		1048576.0							Modifier		Mi
+Gibi		1073741824.0						Modifier		Gi
+Tebi		1099511627776.0				Modifier		Ti
+Pebi		1125899906842624.0			Modifier		Pi
+Exbi		1152921504606846976.0		Modifier		Ei
