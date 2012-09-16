@@ -88,7 +88,12 @@ Mile			1609.344	Meter			mi
 NauticalMile		1852.0		Meter			nmi
 
 :volume
-Gallon		0.003785411784		Meter,Meter,Meter	gal
+CubicInch	0.000016387064		Meter,Meter,Meter	in^3
+CubicFeet	0.028316846592		Meter,Meter,Meter	ft^3
+CubicYard	0.764554857984		Meter,Meter,Meter	yd^3
+Pint				0.000473176473		Meter,Meter,Meter	pt
+Quart			0.000946352946		Meter,Meter,Meter	qt
+Gallon			0.003785411784		Meter,Meter,Meter	gal
 
 :mass
 Dram			1.7718451953			Gram				dr

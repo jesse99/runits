@@ -1,5 +1,5 @@
 // DO NOT EDIT: generated from units.in using gen_units.py
-export Unit, Newton, Joule, Ohm, Hertz, Volt, Farad, Kelvin, Celsius, Fahrenheit, Hectare, Tesla, Bit, Byte, Siemens, Watt, Liter, Gallon, Pascal, Henry, Mole, Candela, Ampere, Yocto, Zepto, Atto, Femto, Pico, Nano, Micro, Milli, Centi, Deci, Hecto, Kilo, Mega, Giga, Tera, Peta, Exa, Zetta, Yotta, Kibi, Mebi, Gibi, Tebi, Pebi, Exbi, Weber, Meter, AU, Inch, Feet, Yard, Mile, NauticalMile, Coulomb, Gram, Tonne, Dram, Ounce, Pound, Second, Minute, Hour, Day, Month, Year, Compound;
+export Unit, Newton, Joule, Ohm, Hertz, Volt, Farad, Kelvin, Celsius, Fahrenheit, Hectare, Tesla, Bit, Byte, Siemens, Watt, Liter, CubicInch, CubicFeet, CubicYard, Pint, Quart, Gallon, Pascal, Henry, Mole, Candela, Ampere, Yocto, Zepto, Atto, Femto, Pico, Nano, Micro, Milli, Centi, Deci, Hecto, Kilo, Mega, Giga, Tera, Peta, Exa, Zetta, Yotta, Kibi, Mebi, Gibi, Tebi, Pebi, Exbi, Weber, Meter, AU, Inch, Feet, Yard, Mile, NauticalMile, Coulomb, Gram, Tonne, Dram, Ounce, Pound, Second, Minute, Hour, Day, Month, Year, Compound;
 export canonical_unit, is_modifier, unit_type, unit_abrev;	// these are really internal items
 
 /// Simple units are specified with one of the constructors (e.g. Meter).
@@ -49,6 +49,11 @@ enum Unit
 	
 	// volume
 	Liter,
+	CubicInch,
+	CubicFeet,
+	CubicYard,
+	Pint,
+	Quart,
 	Gallon,
 	
 	// pressure
@@ -173,6 +178,11 @@ pure fn canonical_unit(u: Unit) -> (float, float, @[Unit], @[Unit])
 		
 		// volume
 		Liter			=> (0.0, 0.001, @[Meter,Meter,Meter], @[]),
+		CubicInch			=> (0.0, 0.000016387064, @[Meter,Meter,Meter], @[]),
+		CubicFeet			=> (0.0, 0.028316846592, @[Meter,Meter,Meter], @[]),
+		CubicYard			=> (0.0, 0.764554857984, @[Meter,Meter,Meter], @[]),
+		Pint			=> (0.0, 0.000473176473, @[Meter,Meter,Meter], @[]),
+		Quart			=> (0.0, 0.000946352946, @[Meter,Meter,Meter], @[]),
 		Gallon			=> (0.0, 0.003785411784, @[Meter,Meter,Meter], @[]),
 		
 		// pressure
@@ -277,7 +287,7 @@ pure fn unit_type(u: Unit) -> ~str
 		Bit | Byte => ~"bits",
 		Siemens => ~"electric_conductance",
 		Watt => ~"power",
-		Liter | Gallon => ~"volume",
+		Liter | CubicInch | CubicFeet | CubicYard | Pint | Quart | Gallon => ~"volume",
 		Pascal => ~"pressure",
 		Henry => ~"inductance",
 		Mole => ~"amount_of_substance",
@@ -338,6 +348,11 @@ pure fn unit_abrev(u: Unit) -> ~str
 		
 		// volume
 		Liter		=> ~"L",
+		CubicInch		=> ~"in^3",
+		CubicFeet		=> ~"ft^3",
+		CubicYard		=> ~"yd^3",
+		Pint		=> ~"pt",
+		Quart		=> ~"qt",
 		Gallon		=> ~"gal",
 		
 		// pressure

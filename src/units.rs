@@ -23,6 +23,7 @@ impl Unit
 	}
 }
 
+/// For binary ops the rhs is converted to the units of the lhs.
 impl Unit : ops::Mul<Unit, Unit>
 {
 	pure fn mul(rhs: Unit) -> Unit
@@ -467,15 +468,11 @@ pure fn check_commensurable(lhs: Value, rhs: Unit, fname: &str)
 		let numer1 = box_str_hash();
 		let denom1 = box_str_hash();
 		let lhs2 = to_canonical(lhs);
-error!("lhs %?", lhs);
-error!("lhs2 %?", lhs2);
 		increment_type(numer1, denom1, lhs2.units);
 		
 		let numer2 = box_str_hash();
 		let denom2 = box_str_hash();
 		let rhs2 = to_canonical(from_units(1.0, rhs));
-error!("rhs %?", rhs);
-error!("rhs2 %?", rhs2);
 		increment_type(numer2, denom2, rhs2.units);
 		
 		if numer1 != numer2 || denom1 != denom2
