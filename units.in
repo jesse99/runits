@@ -2,19 +2,9 @@
 
 # SI units from http://en.wikipedia.org/wiki/SI and
 # http://en.wikipedia.org/wiki/Non-SI_units_accepted_for_use_with_SI
-# TODO: If constants become more capable could add
-# units from http://en.wikipedia.org/wiki/SI_derived_units
-# and some from http://en.wikipedia.org/wiki/Non-SI_units_accepted_for_use_with_SI.
-# In the interim users can define locals for them.
 :length
 Meter		1.0							Meter		m
 AU				1.49597870691e11	Meter		ua
-
-:area
-Hectare	10000.0	Meter*Meter	ha
-
-:volume
-Liter		0.001		Meter*Meter*Meter	L
 
 :mass
 Gram			1.0			Gram				g
@@ -23,10 +13,10 @@ Tonne		1.0e6		Gram				t
 # month is the mean Gregorian month length
 # year is the astronomical year
 :time
-Second		1.0			Second			s
-Minute		60.0			Second			min
-Hour			3600.0		Second			h
-Day			86400.0	Second			d
+Second		1.0				Second		s
+Minute		60.0				Second		min
+Hour			3600.0			Second		h
+Day			86400.0		Second		d
 Month		2629746.0	Second		mo
 Year			31557600.0	Second		yr
 
@@ -42,6 +32,52 @@ Candela	1.0			Candela		cd
 :amount_of_substance
 Mole			1.0			Mole				mol
 
+# derived units
+:area
+Hectare	10000.0		Meter,Meter	ha
+
+:volume
+Liter		0.001			Meter,Meter,Meter	L
+
+:frequency
+Hertz		1.0				/Second		Hz
+
+:force
+Newton		1.0				Kilo,Gram,Meter/Second,Second		N
+
+:pressure
+Pascal		1.0				Kilo,Gram/Meter,Second,Second		Pa
+
+:energy
+Joule		1.0				Kilo,Gram,Meter,Meter/Second,Second		J
+
+:power
+Watt			1.0				Kilo,Gram,Meter,Meter/Second,Second,Second		W
+
+:electric_charge
+Coulomb	1.0				Second,Ampere		C
+
+:voltage
+Volt			1.0				Kilo,Gram,Meter,Meter/Second,Second,Second,Ampere		V
+
+:electric_capcitance
+Farad		1.0				Second,Second,Second,Second,Ampere,Ampere/Kilo,Gram,Meter,Meter		F
+
+:electric_resistance
+Ohm			1.0				Kilo,Gram,Meter,Meter/Second,Second,Second,Ampere,Ampere		ohm
+
+:electric_conductance
+Siemens	1.0				Second,Second,Second,Ampere,Ampere/Kilo,Gram,Meter,Meter		S
+
+:magnetic_flux
+Weber		1.0				Kilo,Gram,Meter,Meter/Second,Second,Ampere		Wb
+
+:magnetic_field_strength
+Tesla		1.0				Kilo,Gram/Second,Second,Ampere		T
+
+:inductance
+Henry		1.0				Kilo,Gram,Meter,Meter/Second,Second,Ampere,Ampere		H
+
 
 # USA customary units from http://en.wikipedia.org/wiki/United_States_customary_units
 :length
@@ -52,7 +88,7 @@ Mile			1609.344	Meter			mi
 NauticalMile		1852.0		Meter			nmi
 
 :volume
-Gallon		0.003785411784		Meter*Meter*Meter	gal
+Gallon		0.003785411784		Meter,Meter,Meter	gal
 
 :mass
 Dram			1.7718451953			Gram				dr

@@ -158,9 +158,6 @@ impl Unit : cmp::Eq
 /// Values are numbers represented in an arbitrary unit. They support
 /// the standard arithmetic operations and fail is called if the units are
 /// incompatible (e.g. if meters are added to seconds).
-///
-/// Note that units are converted to different units only when explicitly
-/// directed to do so (e.g. via convert_to). 
 struct Value
 {
 	pub value: float,
@@ -192,9 +189,7 @@ impl Value
 {
 	fn convert_to(to: Unit) -> Value
 	{
-		check_commensurable_units(self.units, to, ~"convert_to");
-		let c = to_canonical(self);
-		from_canonical(c.value, to)
+		convert_to(self, to, ~"convert_to")
 	}
 }
 
@@ -219,7 +214,7 @@ impl Value : ops::Modulo<Value, Value>
 {
 	pure fn modulo(rhs: Value) -> Value
 	{
-		check_identical_units(self.units, rhs.units, ~"modulo");
+		let rhs = convert_to(rhs, self.units, ~"modulo");
 		Value {value: self.value % rhs.value, units: self.units}
 	}
 }
@@ -228,7 +223,7 @@ impl Value : ops::Add<Value, Value>
 {
 	pure fn add(rhs: Value) -> Value
 	{
-		check_identical_units(self.units, rhs.units, ~"add");
+		let rhs = convert_to(rhs, self.units, ~"add");
 		Value {value: self.value + rhs.value, units: self.units}
 	}
 }
@@ -237,7 +232,7 @@ impl Value : ops::Sub<Value, Value>
 {
 	pure fn sub(rhs: Value) -> Value
 	{
-		check_identical_units(self.units, rhs.units, ~"sub");
+		let rhs = convert_to(rhs, self.units, ~"sub");
 		Value {value: self.value - rhs.value, units: self.units}
 	}
 }
@@ -254,25 +249,25 @@ impl Value : cmp::Ord
 {
 	pure fn lt(&&rhs: Value) -> bool
 	{
-		check_identical_units(self.units, rhs.units, ~"lt");
+		let rhs = convert_to(rhs, self.units, ~"lt");
 		self.value < rhs.value
 	}
 	
 	pure fn le(&&rhs: Value) -> bool
 	{
-		check_identical_units(self.units, rhs.units, ~"le");
+		let rhs = convert_to(rhs, self.units, ~"le");
 		self.value <= rhs.value
 	}
 	
 	pure fn ge(&&rhs: Value) -> bool
 	{
-		check_identical_units(self.units, rhs.units, ~"ge");
+		let rhs = convert_to(rhs, self.units, ~"ge");
 		self.value >= rhs.value
 	}
 	
 	pure fn gt(&&rhs: Value) -> bool
 	{
-		check_identical_units(self.units, rhs.units, ~"gt");
+		let rhs = convert_to(rhs, self.units, ~"gt");
 		self.value > rhs.value
 	}
 }
@@ -281,13 +276,13 @@ impl Value : cmp::Eq
 {
 	pure fn eq(&&rhs: Value) -> bool
 	{
-		check_identical_units(self.units, rhs.units, ~"eq");
+		let rhs = convert_to(rhs, self.units, ~"eq");
 		self.value == rhs.value
 	}
 	
 	pure fn ne(&&rhs: Value) -> bool
 	{
-		check_identical_units(self.units, rhs.units, ~"ne");
+		let rhs = convert_to(rhs, self.units, ~"ne");
 		self.value != rhs.value
 	}
 }
@@ -308,6 +303,20 @@ impl  Value : ToStr
 }
 
 // ---- Internal Items ------------------------------------------------------------------
+pure fn convert_to(value: Value, to: Unit, fname: ~str) -> Value
+{
+	if value.units == to
+	{
+		value
+	}
+	else
+	{
+		check_commensurable(value, to, fname);
+		let c = to_canonical(value);
+		from_canonical(c.value, to)
+	}
+}
+
 pure fn to_compound(unit: Unit) -> (@[Unit], @[Unit])
 {
 	match unit
@@ -374,17 +383,19 @@ pure fn to_canonical(x: Value) -> Value
 	for numer.each
 	|u|
 	{
-		let (offset, scaling, v) = canonical_unit(u);
+		let (offset, scaling, n, d) = canonical_unit(u);
 		rvalue = (rvalue + offset)*scaling;
-		rnumer += v;
+		rnumer += n;
+		rdenom += d;
 	}
 	
 	for denom.each
 	|u|
 	{
-		let (offset, scaling, v) = canonical_unit(u);
+		let (offset, scaling, n, d) = canonical_unit(u);
 		rvalue = rvalue*(1.0/scaling) - offset;
-		rdenom += v;
+		rnumer += d;
+		rdenom += n;
 	}
 	
 	from_units(rvalue, Compound(rnumer, rdenom))
@@ -406,7 +417,7 @@ pure fn from_canonical(x: float, u: Unit) -> Value
 	for numer.each
 	|u|
 	{
-		let (offset, scaling, _v) = canonical_unit(u);
+		let (offset, scaling, _n, _d) = canonical_unit(u);
 		rvalue = rvalue*(1.0/scaling) - offset;
 		rnumer += @[u];
 	}
@@ -414,7 +425,7 @@ pure fn from_canonical(x: float, u: Unit) -> Value
 	for denom.each
 	|u|
 	{
-		let (offset, scaling, _v) = canonical_unit(u);
+		let (offset, scaling, _n, _d) = canonical_unit(u);
 		rvalue = (rvalue + offset)*scaling;
 		rdenom += @[u];
 	}
@@ -422,26 +433,14 @@ pure fn from_canonical(x: float, u: Unit) -> Value
 	from_units(rvalue, Compound(rnumer, rdenom))
 }
 
-// Fails if the units are different.
-pure fn check_identical_units(lhs: Unit, rhs: Unit, fname: &str)
-{
-	pure fn unit_name(u: Unit) -> ~str {fmt!("%?", u)}
-	check_compatible_units(lhs, rhs, fname, unit_name)
-}
-
 // Fails if the unit kinds are different.
-pure fn check_commensurable_units(lhs: Unit, rhs: Unit, fname: &str)
+pure fn check_commensurable(lhs: Value, rhs: Unit, fname: &str)
 {
-	check_compatible_units(lhs, rhs, fname, unit_type)
-}
-
-pure fn check_compatible_units(lhs: Unit, rhs: Unit, fname: &str, kind: fn@ (u: Unit) -> ~str)
-{
-	fn increment_type(numer: hashmap<@~str, uint>, denom: hashmap<@~str, uint>, u: Unit, kind: fn@ (u: Unit) -> ~str)
+	fn increment_type(numer: hashmap<@~str, uint>, denom: hashmap<@~str, uint>, u: Unit)
 	{
-		fn increment(table: hashmap<@~str, uint>, u: Unit, kind: fn@ (u: Unit) -> ~str)
+		fn increment(table: hashmap<@~str, uint>, u: Unit)
 		{
-			let key = @kind(u);
+			let key = @unit_type(u);
 			if key.is_not_empty()
 			{
 				match table.find(key)
@@ -456,10 +455,10 @@ pure fn check_compatible_units(lhs: Unit, rhs: Unit, fname: &str, kind: fn@ (u: 
 		{
 			Compound(n, d)	=>
 			{
-				for n.each |v| {increment(numer, v, kind)}
-				for d.each |v| {increment(denom, v, kind)}
+				for n.each |v| {increment(numer, v)}
+				for d.each |v| {increment(denom, v)}
 			}
-			_ => {increment(numer, u, kind)}
+			_ => {increment(numer, u)}
 		}
 	}
 	
@@ -467,15 +466,29 @@ pure fn check_compatible_units(lhs: Unit, rhs: Unit, fname: &str, kind: fn@ (u: 
 	{
 		let numer1 = box_str_hash();
 		let denom1 = box_str_hash();
-		increment_type(numer1, denom1, lhs, kind);
+		let lhs2 = to_canonical(lhs);
+error!("lhs %?", lhs);
+error!("lhs2 %?", lhs2);
+		increment_type(numer1, denom1, lhs2.units);
 		
 		let numer2 = box_str_hash();
 		let denom2 = box_str_hash();
-		increment_type(numer2, denom2, rhs, kind);
+		let rhs2 = to_canonical(from_units(1.0, rhs));
+error!("rhs %?", rhs);
+error!("rhs2 %?", rhs2);
+		increment_type(numer2, denom2, rhs2.units);
 		
 		if numer1 != numer2 || denom1 != denom2
 		{
-			fail fmt!("incompatible units for `%s`.%s(`%s`)", lhs.to_str(), fname, rhs.to_str());
+			if str::eq_slice(fname, ~"convert_to")
+			{
+				fail fmt!("incompatible units for `%s`.%s(`%s`)", lhs.to_str(), fname, rhs.to_str());
+			}
+			else
+			{
+				// For everything but convert_to this is called with lhs and rhs swapped.
+				fail fmt!("incompatible units for `%s`.%s(`%s`)", rhs.to_str(), fname, lhs.to_str());
+			}
 		}
 	}
 }
@@ -691,13 +704,13 @@ fn test_value_add()
 }
 
 #[test]
-#[should_fail]
-fn test_incompatible_add()
+fn test_compatible_add()
 {
 	let x = from_units(5.0, Feet);
 	let y = from_units(2.0, Meter);
 	let z = x + y;
-	assert z.value > 0.0;
+	assert check_floats(z.value, 5.0+6.5616798);
+	assert check_units(z.units, Feet);
 }
 
 #[test]
@@ -726,4 +739,12 @@ fn test_incompaible_derived()
 {
 	let x = from_units(3.0, Hectare).convert_to(Gallon);
 	assert x.value > 0.0;
+}
+
+#[test]
+fn test_math()
+{
+	let x = from_units(3.0, Watt) + from_units(10.0, Joule)/from_units(2.0, Second);
+	assert check_floats(x.value, 8.0);
+	assert check_units(x.units, Watt);
 }
