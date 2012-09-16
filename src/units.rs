@@ -238,6 +238,39 @@ impl Value
 		
 		value
 	}
+	
+	/// If self is less than 1s then use normalize_si. Otherwise set units to the
+	/// largest time unit such that value >= 1.0.
+	///
+	/// Fails if value is not a simple time.
+	pure fn normalize_time() -> Value
+	{
+		let value = self.convert_to(Second);
+		if value.value < 1.0
+		{
+			value.normalize_si()
+		}
+		else if (value.value >= 60.0)
+		{
+			let x = value.convert_to(Year);
+			if float::abs(x.value) >= 1.0 {return x}
+			
+			let x = value.convert_to(Month);
+			if float::abs(x.value) >= 1.0 {return x}
+			
+			let x = value.convert_to(Day);
+			if float::abs(x.value) >= 1.0 {return x}
+			
+			let x = value.convert_to(Hour);
+			if float::abs(x.value) >= 1.0 {return x}
+			
+			value.convert_to(Minute)
+		}
+		else
+		{
+			value
+		}
+	}
 }
 
 impl Value : ops::Mul<Value, Value>
@@ -919,4 +952,20 @@ fn test_normalize_binary()
 	let x = from_units(-1025.0, Byte).normalize_binary();
 	assert check_floats(x.value, -1025.0/1024.0);
 	assert check_units(x.units, Kibi*Byte);
+}
+
+#[test]
+fn test_normalize_time()
+{
+	let x = from_units(5.0, Second).normalize_time();
+	assert check_floats(x.value, 5.0);
+	assert check_units(x.units, Second);
+	
+	let x = from_units(0.033, Second).normalize_time();
+	assert check_floats(x.value, 33.0);
+	assert check_units(x.units, Milli*Second);
+	
+	let x = from_units(33.0, Day).normalize_time();
+	assert check_floats(x.value, 1.084211);
+	assert check_units(x.units, Month);
 }
