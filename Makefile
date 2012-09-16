@@ -12,6 +12,9 @@ check: bin/test-runits
 check1: bin/test-runits
 	export RUST_LOG=runits=2 && ./bin/test-runits test_math
 
+install:
+	install -p `find bin -name "librunits*" -type f -maxdepth 1` /usr/local/lib/rust
+	
 # ------------------
 # Binary targets 
 src/generated.rs: units.in gen_units.py

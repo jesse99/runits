@@ -3,7 +3,7 @@ use std::map::*;
 use core::ops::*;
 use generated::*;
 
-export Value;
+export Value, from_number, from_units;
 
 // ---- Unit ----------------------------------------------------------------------------
 impl Unit
@@ -17,7 +17,7 @@ impl Unit
 		}
 	}
 	
-	pure fn is_not_dimensionless() -> bool
+	pure fn is_not_dimensionless() -> bool 
 	{
 		!self.is_dimensionless()
 	}

@@ -8,12 +8,14 @@
 #[warn(non_camel_case_types)]; 
 #[warn(implicit_copies)];
 #[warn(non_implicitly_copyable_typarams)];
-#[allow(deprecated_mode)];			// TODO: enable this
 #[warn(deprecated_pattern)];
 #[warn(unused_imports)];
+#[allow(deprecated_mode)];			// TODO: enable this
 #[allow(structural_records)];			// TODO: enable this
 
 use std;
-
+ 
 mod generated;
 mod units;
+
+// TODO: figure out how to re-export items so that clients can simply use the runits module
