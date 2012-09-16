@@ -129,6 +129,8 @@ class WriteOutput(object):
 				self.__write_is_modifier(f)
 				self.__write_unit_type(f)
 				self.__write_unit_abrev(f)
+				self.__write_si_modifiers(f)
+				self.__write_binary_modifiers(f)
 		except Exception, e:
 			sys.stderr.write("Failed to write %s: %s.\n" % (options.dst, e))
 			if options.verbose >= 1:
@@ -144,7 +146,7 @@ class WriteOutput(object):
 			for unit in units:
 				f.write(', %s' % unit.name)
 		f.write(', Compound;\n')
-		f.write('export canonical_unit, is_modifier, unit_type, unit_abrev;	// these are really internal items\n')
+		f.write('export canonical_unit, is_modifier, unit_type, unit_abrev, si_modifiers, binary_modifiers;	// these are really internal items\n')
 		f.write('\n')
 	
 	def __write_enum(self, f):
@@ -171,7 +173,7 @@ class WriteOutput(object):
 		f.write('	match u\n')
 		f.write('	{\n')
 		for kind, units in self.__data.items():
-			if kind != 'modifiers':
+			if kind != 'si_modifiers' and kind != 'binary_modifiers':
 				f.write('		// %s\n' % kind)
 				for unit in units:
 					parts = unit.scaling.split('|')
@@ -191,8 +193,12 @@ class WriteOutput(object):
 						denom = parts[1]
 					f.write('		%s			=> (%s, %s, @[%s], @[%s]),\n' % (unit.name, offset, scaling, num, denom))
 				f.write('		\n')
-		f.write('		// modifiers\n')
-		for unit in self.__data['modifiers']:
+		f.write('		// SI modifiers\n')
+		for unit in self.__data['si_modifiers']:
+			f.write('		%s			=> (0.0, %s, @[], @[]),\n' % (unit.name, unit.scaling))
+		f.write('		\n')
+		f.write('		// IEC binary modifiers\n')
+		for unit in self.__data['binary_modifiers']:
 			f.write('		%s			=> (0.0, %s, @[], @[]),\n' % (unit.name, unit.scaling))
 		f.write('		\n')
 		f.write('		// compound\n')
@@ -206,7 +212,8 @@ class WriteOutput(object):
 		f.write('{\n')
 		f.write('	match u\n')
 		f.write('	{\n')
-		f.write('		%s => true,\n' % ' | '.join(map(lambda u: u.name, self.__data['modifiers'])))
+		f.write('		%s => true,\n' % ' | '.join(map(lambda u: u.name, self.__data['si_modifiers'])))
+		f.write('		%s => true,\n' % ' | '.join(map(lambda u: u.name, self.__data['binary_modifiers'])))
 		f.write('		_ => false,\n')
 		f.write('	}\n')
 		f.write('}\n')
@@ -219,7 +226,7 @@ class WriteOutput(object):
 		f.write('	{\n')
 		for kind, units in self.__data.items():
 			names = ' | '.join(map(lambda u: u.name, units))
-			if kind != 'modifiers':
+			if kind != 'si_modifiers' and kind != 'binary_modifiers':
 				f.write('		%s => ~"%s",\n' % (names, kind))
 			else:
 				f.write('		%s => ~"",\n' % names)
@@ -241,6 +248,22 @@ class WriteOutput(object):
 		f.write('		// compound\n')
 		f.write('		Compound(*)	=> fail fmt!("unit_abrev should only be called with simple units, not %?", u),\n')
 		f.write('	}\n')
+		f.write('}\n')
+	
+	def __write_si_modifiers(self, f):
+		f.write('\n')
+		f.write('pure fn si_modifiers(f: pure fn (Unit) -> bool)\n')
+		f.write('{\n')
+		for unit in self.__data['si_modifiers']:
+			f.write('	if !f(%s) {return;}\n' % unit.name)
+		f.write('}\n')
+	
+	def __write_binary_modifiers(self, f):
+		f.write('\n')
+		f.write('pure fn binary_modifiers(f: pure fn (Unit) -> bool)\n')
+		f.write('{\n')
+		for unit in self.__data['binary_modifiers']:
+			f.write('	if !f(%s) {return;}\n' % unit.name)
 		f.write('}\n')
 	
 parser = argparse.ArgumentParser(description = "Generates rust code for units.")

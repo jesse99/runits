@@ -1,6 +1,6 @@
 // DO NOT EDIT: generated from units.in using gen_units.py
-export Unit, Newton, Joule, Ohm, Hertz, Volt, Kelvin, Celsius, Fahrenheit, Hectare, Tesla, Bit, Byte, Siemens, Watt, Liter, CubicInch, CubicFeet, CubicYard, Pint, Quart, Gallon, Pascal, Henry, Mole, Candela, Ampere, Yocto, Zepto, Atto, Femto, Pico, Nano, Micro, Milli, Centi, Deci, Hecto, Kilo, Mega, Giga, Tera, Peta, Exa, Zetta, Yotta, Kibi, Mebi, Gibi, Tebi, Pebi, Exbi, Weber, Meter, AU, Inch, Feet, Yard, Mile, NauticalMile, LightYear, Parsec, Coulomb, Gram, Tonne, Dram, Ounce, Pound, Farad, Second, Minute, Hour, Day, Month, Year, Compound;
-export canonical_unit, is_modifier, unit_type, unit_abrev;	// these are really internal items
+export Unit, Newton, Joule, Ohm, Hertz, Volt, Kelvin, Celsius, Fahrenheit, Hectare, Tesla, Bit, Byte, Siemens, Watt, Liter, CubicInch, CubicFeet, CubicYard, Pint, Quart, Gallon, Pascal, Henry, Yocto, Zepto, Atto, Femto, Pico, Nano, Micro, Milli, Centi, Deci, Hecto, Kilo, Mega, Giga, Tera, Peta, Exa, Zetta, Yotta, Mole, Candela, Ampere, Weber, Kibi, Mebi, Gibi, Tebi, Pebi, Exbi, Meter, AU, Inch, Feet, Yard, Mile, NauticalMile, LightYear, Parsec, Coulomb, Gram, Tonne, Dram, Ounce, Pound, Farad, Second, Minute, Hour, Day, Month, Year, Compound;
+export canonical_unit, is_modifier, unit_type, unit_abrev, si_modifiers, binary_modifiers;	// these are really internal items
 
 /// Simple units are specified with one of the constructors (e.g. Meter).
 /// Compound units are constructed using multiplication and division
@@ -59,16 +59,7 @@ enum Unit
 	// inductance
 	Henry,
 	
-	// amount_of_substance
-	Mole,
-	
-	// luminous_intensity
-	Candela,
-	
-	// electric_current
-	Ampere,
-	
-	// modifiers
+	// si_modifiers
 	Yocto,
 	Zepto,
 	Atto,
@@ -88,15 +79,26 @@ enum Unit
 	Exa,
 	Zetta,
 	Yotta,
+	
+	// amount_of_substance
+	Mole,
+	
+	// luminous_intensity
+	Candela,
+	
+	// electric_current
+	Ampere,
+	
+	// magnetic_flux
+	Weber,
+	
+	// binary_modifiers
 	Kibi,
 	Mebi,
 	Gibi,
 	Tebi,
 	Pebi,
 	Exbi,
-	
-	// magnetic_flux
-	Weber,
 	
 	// length
 	Meter,
@@ -234,7 +236,7 @@ pure fn canonical_unit(u: Unit) -> (float, float, @[Unit], @[Unit])
 		Month			=> (0.0, 2629746.0, @[Second], @[]),
 		Year			=> (0.0, 31557600.0, @[Second], @[]),
 		
-		// modifiers
+		// SI modifiers
 		Yocto			=> (0.0, 1.0e-24, @[], @[]),
 		Zepto			=> (0.0, 1.0e-21, @[], @[]),
 		Atto			=> (0.0, 1.0e-18, @[], @[]),
@@ -254,6 +256,8 @@ pure fn canonical_unit(u: Unit) -> (float, float, @[Unit], @[Unit])
 		Exa			=> (0.0, 1.0e18, @[], @[]),
 		Zetta			=> (0.0, 1.0e21, @[], @[]),
 		Yotta			=> (0.0, 1.0e24, @[], @[]),
+		
+		// IEC binary modifiers
 		Kibi			=> (0.0, 1024.0, @[], @[]),
 		Mebi			=> (0.0, 1048576.0, @[], @[]),
 		Gibi			=> (0.0, 1073741824.0, @[], @[]),
@@ -270,7 +274,8 @@ pure fn is_modifier(u: Unit) -> bool
 {
 	match u
 	{
-		Yocto | Zepto | Atto | Femto | Pico | Nano | Micro | Milli | Centi | Deci | Hecto | Kilo | Mega | Giga | Tera | Peta | Exa | Zetta | Yotta | Kibi | Mebi | Gibi | Tebi | Pebi | Exbi => true,
+		Yocto | Zepto | Atto | Femto | Pico | Nano | Micro | Milli | Centi | Deci | Hecto | Kilo | Mega | Giga | Tera | Peta | Exa | Zetta | Yotta => true,
+		Kibi | Mebi | Gibi | Tebi | Pebi | Exbi => true,
 		_ => false,
 	}
 }
@@ -293,11 +298,12 @@ pure fn unit_type(u: Unit) -> ~str
 		Liter | CubicInch | CubicFeet | CubicYard | Pint | Quart | Gallon => ~"volume",
 		Pascal => ~"pressure",
 		Henry => ~"inductance",
+		Yocto | Zepto | Atto | Femto | Pico | Nano | Micro | Milli | Centi | Deci | Hecto | Kilo | Mega | Giga | Tera | Peta | Exa | Zetta | Yotta => ~"",
 		Mole => ~"amount_of_substance",
 		Candela => ~"luminous_intensity",
 		Ampere => ~"electric_current",
-		Yocto | Zepto | Atto | Femto | Pico | Nano | Micro | Milli | Centi | Deci | Hecto | Kilo | Mega | Giga | Tera | Peta | Exa | Zetta | Yotta | Kibi | Mebi | Gibi | Tebi | Pebi | Exbi => ~"",
 		Weber => ~"magnetic_flux",
+		Kibi | Mebi | Gibi | Tebi | Pebi | Exbi => ~"",
 		Meter | AU | Inch | Feet | Yard | Mile | NauticalMile | LightYear | Parsec => ~"length",
 		Coulomb => ~"electric_charge",
 		Gram | Tonne | Dram | Ounce | Pound => ~"mass",
@@ -362,16 +368,7 @@ pure fn unit_abrev(u: Unit) -> ~str
 		// inductance
 		Henry		=> ~"H",
 		
-		// amount_of_substance
-		Mole		=> ~"mol",
-		
-		// luminous_intensity
-		Candela		=> ~"cd",
-		
-		// electric_current
-		Ampere		=> ~"A",
-		
-		// modifiers
+		// si_modifiers
 		Yocto		=> ~"y",
 		Zepto		=> ~"z",
 		Atto		=> ~"a",
@@ -391,15 +388,26 @@ pure fn unit_abrev(u: Unit) -> ~str
 		Exa		=> ~"E",
 		Zetta		=> ~"Z",
 		Yotta		=> ~"Y",
+		
+		// amount_of_substance
+		Mole		=> ~"mol",
+		
+		// luminous_intensity
+		Candela		=> ~"cd",
+		
+		// electric_current
+		Ampere		=> ~"A",
+		
+		// magnetic_flux
+		Weber		=> ~"Wb",
+		
+		// binary_modifiers
 		Kibi		=> ~"Ki",
 		Mebi		=> ~"Mi",
 		Gibi		=> ~"Gi",
 		Tebi		=> ~"Ti",
 		Pebi		=> ~"Pi",
 		Exbi		=> ~"Ei",
-		
-		// magnetic_flux
-		Weber		=> ~"Wb",
 		
 		// length
 		Meter		=> ~"m",
@@ -436,4 +444,37 @@ pure fn unit_abrev(u: Unit) -> ~str
 		// compound
 		Compound(*)	=> fail fmt!("unit_abrev should only be called with simple units, not %?", u),
 	}
+}
+
+pure fn si_modifiers(f: pure fn (Unit) -> bool)
+{
+	if !f(Yocto) {return;}
+	if !f(Zepto) {return;}
+	if !f(Atto) {return;}
+	if !f(Femto) {return;}
+	if !f(Pico) {return;}
+	if !f(Nano) {return;}
+	if !f(Micro) {return;}
+	if !f(Milli) {return;}
+	if !f(Centi) {return;}
+	if !f(Deci) {return;}
+	if !f(Hecto) {return;}
+	if !f(Kilo) {return;}
+	if !f(Mega) {return;}
+	if !f(Giga) {return;}
+	if !f(Tera) {return;}
+	if !f(Peta) {return;}
+	if !f(Exa) {return;}
+	if !f(Zetta) {return;}
+	if !f(Yotta) {return;}
+}
+
+pure fn binary_modifiers(f: pure fn (Unit) -> bool)
+{
+	if !f(Kibi) {return;}
+	if !f(Mebi) {return;}
+	if !f(Gibi) {return;}
+	if !f(Tebi) {return;}
+	if !f(Pebi) {return;}
+	if !f(Exbi) {return;}
 }

@@ -120,7 +120,7 @@ Byte			8.0		Bit		B
 
 
 # Modifiers from http://en.wikipedia.org/wiki/Metric_prefix
-:modifiers
+:si_modifiers
 Yocto		1.0e-24	Modifier		y
 Zepto		1.0e-21	Modifier		z
 Atto			1.0e-18	Modifier		a
@@ -143,7 +143,7 @@ Yotta		1.0e24		Modifier		Y
 
 
 # Binary modifiers from http://en.wikipedia.org/wiki/Binary_prefix
-:modifiers
+:binary_modifiers
 Kibi		1024.0									Modifier		Ki
 Mebi		1048576.0							Modifier		Mi
 Gibi		1073741824.0						Modifier		Gi

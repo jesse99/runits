@@ -188,9 +188,55 @@ pure fn from_units(value: float, units: Unit) -> Value
 
 impl Value
 {
-	fn convert_to(to: Unit) -> Value
+	pure fn convert_to(to: Unit) -> Value
 	{
 		convert_to(self, to, ~"convert_to")
+	}
+	
+	/// Adjusts prefix such that value >= 1 && value < 1000.
+	///
+	/// Note that this will only select a prefix that is a power of three (so Centi, Deci,
+	/// and Hecto are not used).
+	pure fn normalize_si() -> Value
+	{
+		let mut value = remove_modifiers(self);
+		
+		for si_modifiers
+		|u|
+		{
+			if u != Centi && u != Deci && u != Hecto
+			{
+				let candidate = apply_modifier(value, u);
+				let x = float::abs(candidate.value);
+				if x >= 1.0 && x < 1000.0
+				{
+					value = candidate;
+					break;
+				}
+			}
+		}
+		
+		value
+	}
+	
+	/// Adjusts prefix such that value >= 1 && value < 1024.
+	pure fn normalize_binary() -> Value
+	{
+		let mut value = remove_modifiers(self);
+		
+		for binary_modifiers
+		|u|
+		{
+			let candidate = apply_modifier(value, u);
+			let x = float::abs(candidate.value);
+			if x >= 1.0 && x < 1024.0
+			{
+				value = candidate;
+				break;
+			}
+		}
+		
+		value
 	}
 }
 
@@ -304,6 +350,21 @@ impl  Value : ToStr
 }
 
 // ---- Internal Items ------------------------------------------------------------------
+pure fn apply_modifier(x: Value, u: Unit) -> Value
+{
+	let (_offset, scaling, _numer, _denom) = canonical_unit(u);
+	Value
+	{
+		value: x.value/scaling,
+		units:
+			match x.units
+			{
+				Compound(n, d)	=> Compound(@[u] + n, d),
+				v					=> Compound(@[u, v], @[]),
+			}
+	}
+}
+
 pure fn convert_to(value: Value, to: Unit, fname: ~str) -> Value
 {
 	if value.units == to
@@ -487,6 +548,60 @@ pure fn check_commensurable(lhs: Value, rhs: Unit, fname: &str)
 				fail fmt!("incompatible units for `%s`.%s(`%s`)", rhs.to_str(), fname, lhs.to_str());
 			}
 		}
+	}
+}
+
+pure fn remove_modifiers(x: Value) -> Value
+{
+	pure fn remove(uu: @[Unit]) -> (float, @[Unit])
+	{
+		let mut scaling = 1.0;
+		let mut units = @[];
+		
+		for uu.each
+		|u|
+		{
+			if is_modifier(u)
+			{
+				let (_offset, s, _numer, _denom) = canonical_unit(u);
+				scaling *= s;
+			}
+			else
+			{
+				units += @[u];
+			}
+		}
+		
+		(scaling, units)
+	}
+	
+	let mut value = x.value;
+	let mut numer = @[];
+	let mut denom = @[];
+	
+	match x.units
+	{
+		Compound(n, d) =>
+		{
+			let (s, nn) = remove(n);
+			let (t, dd) = remove(d);
+			value = value*s/t;
+			numer = nn;
+			denom = dd;
+		}
+		u =>
+		{
+			numer += @[u];
+		}
+	}
+	
+	if numer.len() == 1 && denom.is_empty()
+	{
+		from_units(value, numer[0])
+	}
+	else
+	{
+		from_units(value, Compound(numer, denom))
 	}
 }
 
@@ -744,4 +859,64 @@ fn test_math()
 	let x = from_units(3.0, Watt) + from_units(10.0, Joule)/from_units(2.0, Second);
 	assert check_floats(x.value, 8.0);
 	assert check_units(x.units, Watt);
+}
+
+#[test]
+fn test_remove_modifiers()
+{
+	let x = remove_modifiers(from_units(3.0, Kilo*Watt));
+	assert check_floats(x.value, 3000.0);
+	assert check_units(x.units, Watt);
+	
+	let x = remove_modifiers(from_units(3.0, Meter/(Centi*Second)));
+	assert check_floats(x.value, 300.0);
+	assert check_units(x.units, Meter/Second);
+}
+
+#[test]
+fn test_normalize_si()
+{
+	let x = from_units(3.0, Meter).normalize_si();
+	assert check_floats(x.value, 3.0);
+	assert check_units(x.units, Meter);
+	
+	let x = from_units(1025.0, Meter).normalize_si();
+	assert check_floats(x.value, 1.025);
+	assert check_units(x.units, Kilo*Meter);
+	
+	let x = from_units(0.000_000_025, Kilo*Meter).normalize_si();
+	assert check_floats(x.value, 25.0);
+	assert check_units(x.units, Micro*Meter);
+	
+	let x = from_units(-1025.0, Meter).normalize_si();
+	assert check_floats(x.value, -1.025);
+	assert check_units(x.units, Kilo*Meter);
+	
+	let x = from_units(0.000_123, Meter).normalize_si();
+	assert check_floats(x.value, 123.0);
+	assert check_units(x.units, Micro*Meter);
+	
+	let x = from_units(-0.000_023, Meter).normalize_si();
+	assert check_floats(x.value, -23.0);
+	assert check_units(x.units, Micro*Meter);
+	
+	let x = from_units(0.000_003, Meter).normalize_si();
+	assert check_floats(x.value, 3.0);
+	assert check_units(x.units, Micro*Meter);
+}
+
+#[test]
+fn test_normalize_binary()
+{
+	let x = from_units(3.0, Byte).normalize_binary();
+	assert check_floats(x.value, 3.0);
+	assert check_units(x.units, Byte);
+	
+	let x = from_units(1025.0, Byte).normalize_binary();
+	assert check_floats(x.value, 1025.0/1024.0);
+	assert check_units(x.units, Kibi*Byte);
+	
+	let x = from_units(-1025.0, Byte).normalize_binary();
+	assert check_floats(x.value, -1025.0/1024.0);
+	assert check_units(x.units, Kibi*Byte);
 }
