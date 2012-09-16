@@ -48,96 +48,7 @@ impl  Unit : ToStr
 {
 	fn to_str() -> ~str
 	{
-		// Bit of an icky function: converts stuff like ["m", "s", "m"] to "m^2*s".
-		fn units_to_str(original: @[Unit], units: &[~str], invert: bool) -> ~str
-		{
-			fn power_count(units: &[~str], start: uint) -> int
-			{
-				let mut count = 0;
-				
-				for units.eachi
-				|i, u|
-				{
-					if u == units[start]
-					{
-						if i < start
-						{
-							// found an earlier copy of the unit so this one doesn't count
-							return 0;
-						}
-						count += 1;
-					}
-				}
-				
-				count
-			}
-			
-			// This is like str::connect except that it checks for empty terms
-			// and only adds sep if it is not a modifier.
-			fn connect_units(original: @[Unit], units: &[~str]) -> ~str
-			{
-				let mut result = ~"", first = true;
-				for units.eachi
-				|i, ss|
-				{
-					if ss.is_not_empty()
-					{
-						if first
-						{
-							first = false;
-						}
-						else if !is_modifier(original[i-1])
-						{
-							unchecked {str::push_str(result, ~"*");}
-						}
-						unchecked {str::push_str(result, ss)};
-					}
-				}
-				result
-			}
-			
-			let x = do units.mapi
-			|i, u|
-			{
-				match power_count(units, i)
-				{
-					0	=> ~"",
-					1	=> if invert {fmt!("%s^-1", u)} else {copy u},
-					n	=> fmt!("%s^%?", u, if invert {-n} else {n}),
-				}
-			};
-			
-			connect_units(original, x)
-		}
-		
-		match self
-		{
-			Compound(n, d) if  n.is_empty() && d.is_empty() =>
-			{
-				~""
-			}
-			Compound(n, d) =>
-			{
-				let numer = units_to_str(n, do n.map |u| {u.to_str()}, false);
-				let denom = units_to_str(d, do d.map |u| {u.to_str()}, n.is_empty());
-				if numer.is_not_empty() && denom.is_not_empty()
-				{
-					fmt!("%s/%s", numer, denom)
-				}
-				else if denom.is_not_empty()
-				{
-					denom
-				}
-				else
-				{
-					numer
-				}
-			}
-			u =>
-			{
-				unit_abrev(u)
-			}
-		}
+		do_units_to_str(self)
 	}
 }
 
@@ -383,6 +294,100 @@ impl  Value : ToStr
 }
 
 // ---- Internal Items ------------------------------------------------------------------
+fn do_units_to_str(unit: Unit) -> ~str
+{
+	// Bit of an icky function: converts stuff like ["m", "s", "m"] to "m^2*s".
+	fn units_to_str(original: @[Unit], units: &[~str], invert: bool) -> ~str
+	{
+		fn power_count(units: &[~str], start: uint) -> int
+		{
+			let mut count = 0;
+			
+			for units.eachi
+			|i, u|
+			{
+				if u == units[start]
+				{
+					if i < start
+					{
+						// found an earlier copy of the unit so this one doesn't count
+						return 0;
+					}
+					count += 1;
+				}
+			}
+			
+			count
+		}
+		
+		// This is like str::connect except that it checks for empty terms
+		// and only adds sep if it is not a modifier.
+		fn connect_units(original: @[Unit], units: &[~str]) -> ~str
+		{
+			let mut result = ~"", first = true;
+			for units.eachi
+			|i, ss|
+			{
+				if ss.is_not_empty()
+				{
+					if first
+					{
+						first = false;
+					}
+					else if !is_modifier(original[i-1])
+					{
+						unchecked {str::push_str(result, ~"*");}
+					}
+					unchecked {str::push_str(result, ss)};
+				}
+			}
+			result
+		}
+		
+		let x = do units.mapi
+		|i, u|
+		{
+			match power_count(units, i)
+			{
+				0	=> ~"",
+				1	=> if invert {fmt!("%s^-1", u)} else {copy u},
+				n	=> fmt!("%s^%?", u, if invert {-n} else {n}),
+			}
+		};
+		
+		connect_units(original, x)
+	}
+	
+	match unit
+	{
+		Compound(n, d) if  n.is_empty() && d.is_empty() =>
+		{
+			~""
+		}
+		Compound(n, d) =>
+		{
+			let numer = units_to_str(n, do n.map |u| {u.to_str()}, false);
+			let denom = units_to_str(d, do d.map |u| {u.to_str()}, n.is_empty());
+			if numer.is_not_empty() && denom.is_not_empty()
+			{
+				fmt!("%s/%s", numer, denom)
+			}
+			else if denom.is_not_empty()
+			{
+				denom
+			}
+			else
+			{
+				numer
+			}
+		}
+		u =>
+		{
+			unit_abrev(u)
+		}
+	}
+}
+
 pure fn apply_modifier(x: Value, u: Unit) -> Value
 {
 	let (_offset, scaling, _numer, _denom) = canonical_unit(u);
