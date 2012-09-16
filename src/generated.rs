@@ -1,5 +1,5 @@
 // DO NOT EDIT: generated from units.in using gen_units.py
-export Unit, Newton, Joule, Ohm, Hertz, Volt, Farad, Kelvin, Celsius, Fahrenheit, Hectare, Tesla, Bit, Byte, Siemens, Watt, Liter, CubicInch, CubicFeet, CubicYard, Pint, Quart, Gallon, Pascal, Henry, Mole, Candela, Ampere, Yocto, Zepto, Atto, Femto, Pico, Nano, Micro, Milli, Centi, Deci, Hecto, Kilo, Mega, Giga, Tera, Peta, Exa, Zetta, Yotta, Kibi, Mebi, Gibi, Tebi, Pebi, Exbi, Weber, Meter, AU, Inch, Feet, Yard, Mile, NauticalMile, Coulomb, Gram, Tonne, Dram, Ounce, Pound, Second, Minute, Hour, Day, Month, Year, Compound;
+export Unit, Newton, Joule, Ohm, Hertz, Volt, Kelvin, Celsius, Fahrenheit, Hectare, Tesla, Bit, Byte, Siemens, Watt, Liter, CubicInch, CubicFeet, CubicYard, Pint, Quart, Gallon, Pascal, Henry, Mole, Candela, Ampere, Yocto, Zepto, Atto, Femto, Pico, Nano, Micro, Milli, Centi, Deci, Hecto, Kilo, Mega, Giga, Tera, Peta, Exa, Zetta, Yotta, Kibi, Mebi, Gibi, Tebi, Pebi, Exbi, Weber, Meter, AU, Inch, Feet, Yard, Mile, NauticalMile, LightYear, Parsec, Coulomb, Gram, Tonne, Dram, Ounce, Pound, Farad, Second, Minute, Hour, Day, Month, Year, Compound;
 export canonical_unit, is_modifier, unit_type, unit_abrev;	// these are really internal items
 
 /// Simple units are specified with one of the constructors (e.g. Meter).
@@ -22,9 +22,6 @@ enum Unit
 	
 	// voltage
 	Volt,
-	
-	// electric_capcitance
-	Farad,
 	
 	// temperature
 	Kelvin,
@@ -109,6 +106,8 @@ enum Unit
 	Yard,
 	Mile,
 	NauticalMile,
+	LightYear,
+	Parsec,
 	
 	// electric_charge
 	Coulomb,
@@ -119,6 +118,9 @@ enum Unit
 	Dram,
 	Ounce,
 	Pound,
+	
+	// electric_capacitance
+	Farad,
 	
 	// time
 	Second,
@@ -151,9 +153,6 @@ pure fn canonical_unit(u: Unit) -> (float, float, @[Unit], @[Unit])
 		
 		// voltage
 		Volt			=> (0.0, 1.0, @[Kilo,Gram,Meter,Meter], @[Second,Second,Second,Ampere]),
-		
-		// electric_capcitance
-		Farad			=> (0.0, 1.0, @[Second,Second,Second,Second,Ampere,Ampere], @[Kilo,Gram,Meter,Meter]),
 		
 		// temperature
 		Kelvin			=> (0.0, 1.0, @[Kelvin], @[]),
@@ -211,6 +210,8 @@ pure fn canonical_unit(u: Unit) -> (float, float, @[Unit], @[Unit])
 		Yard			=> (0.0, 0.9144, @[Meter], @[]),
 		Mile			=> (0.0, 1609.344, @[Meter], @[]),
 		NauticalMile			=> (0.0, 1852.0, @[Meter], @[]),
+		LightYear			=> (0.0, 9460730472580800.0, @[Meter], @[]),
+		Parsec			=> (0.0, 30.857e15, @[Meter], @[]),
 		
 		// electric_charge
 		Coulomb			=> (0.0, 1.0, @[Second,Ampere], @[]),
@@ -221,6 +222,9 @@ pure fn canonical_unit(u: Unit) -> (float, float, @[Unit], @[Unit])
 		Dram			=> (0.0, 1.7718451953, @[Gram], @[]),
 		Ounce			=> (0.0, 28.349523125, @[Gram], @[]),
 		Pound			=> (0.0, 453.59237, @[Gram], @[]),
+		
+		// electric_capacitance
+		Farad			=> (0.0, 1.0, @[Second,Second,Second,Second,Ampere,Ampere], @[Kilo,Gram,Meter,Meter]),
 		
 		// time
 		Second			=> (0.0, 1.0, @[Second], @[]),
@@ -280,7 +284,6 @@ pure fn unit_type(u: Unit) -> ~str
 		Ohm => ~"electric_resistance",
 		Hertz => ~"frequency",
 		Volt => ~"voltage",
-		Farad => ~"electric_capcitance",
 		Kelvin | Celsius | Fahrenheit => ~"temperature",
 		Hectare => ~"area",
 		Tesla => ~"magnetic_field_strength",
@@ -295,9 +298,10 @@ pure fn unit_type(u: Unit) -> ~str
 		Ampere => ~"electric_current",
 		Yocto | Zepto | Atto | Femto | Pico | Nano | Micro | Milli | Centi | Deci | Hecto | Kilo | Mega | Giga | Tera | Peta | Exa | Zetta | Yotta | Kibi | Mebi | Gibi | Tebi | Pebi | Exbi => ~"",
 		Weber => ~"magnetic_flux",
-		Meter | AU | Inch | Feet | Yard | Mile | NauticalMile => ~"length",
+		Meter | AU | Inch | Feet | Yard | Mile | NauticalMile | LightYear | Parsec => ~"length",
 		Coulomb => ~"electric_charge",
 		Gram | Tonne | Dram | Ounce | Pound => ~"mass",
+		Farad => ~"electric_capacitance",
 		Second | Minute | Hour | Day | Month | Year => ~"time",
 		Compound(*) => fail fmt!("unit_type should only be called with simple units, not %?", u),
 	}
@@ -321,9 +325,6 @@ pure fn unit_abrev(u: Unit) -> ~str
 		
 		// voltage
 		Volt		=> ~"V",
-		
-		// electric_capcitance
-		Farad		=> ~"F",
 		
 		// temperature
 		Kelvin		=> ~"K",
@@ -408,6 +409,8 @@ pure fn unit_abrev(u: Unit) -> ~str
 		Yard		=> ~"yd",
 		Mile		=> ~"mi",
 		NauticalMile		=> ~"nmi",
+		LightYear		=> ~"ly",
+		Parsec		=> ~"pc",
 		
 		// electric_charge
 		Coulomb		=> ~"C",
@@ -418,6 +421,9 @@ pure fn unit_abrev(u: Unit) -> ~str
 		Dram		=> ~"dr",
 		Ounce		=> ~"oz",
 		Pound		=> ~"lb",
+		
+		// electric_capacitance
+		Farad		=> ~"F",
 		
 		// time
 		Second		=> ~"s",

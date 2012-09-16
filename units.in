@@ -60,7 +60,7 @@ Coulomb	1.0				Second,Ampere		C
 :voltage
 Volt			1.0				Kilo,Gram,Meter,Meter/Second,Second,Second,Ampere		V
 
-:electric_capcitance
+:electric_capacitance
 Farad		1.0				Second,Second,Second,Second,Ampere,Ampere/Kilo,Gram,Meter,Meter		F
 
 :electric_resistance
@@ -110,6 +110,10 @@ Fahrenheit		459.67|0.55556	Kelvin		F
 
 
 # Non-standard units
+:length
+LightYear	9460730472580800.0	Meter		ly
+Parsec			30.857e15					Meter		pc
+
 :bits
 Bit			1.0		Bit		b
 Byte			8.0		Bit		B
