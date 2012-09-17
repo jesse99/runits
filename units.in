@@ -116,6 +116,9 @@ Fahrenheit		459.67|0.55556	Kelvin		F
 LightYear	9460730472580800.0	Meter		ly
 Parsec			30.857e15					Meter		pc
 
+:packets
+Packet			1.0		Packet		p
+
 :bits
 Bit			1.0		Bit		b
 Byte			8.0		Bit		B

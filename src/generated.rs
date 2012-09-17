@@ -1,5 +1,5 @@
 // DO NOT EDIT: generated from units.in using gen_units.py
-export Unit, Newton, Joule, Ohm, Hertz, Volt, Kelvin, Celsius, Fahrenheit, Hectare, Tesla, Bit, Byte, Siemens, Watt, Liter, CubicInch, CubicFeet, CubicYard, Pint, Quart, Gallon, Pascal, Henry, Yocto, Zepto, Atto, Femto, Pico, Nano, Micro, Milli, Centi, Deci, Hecto, Kilo, Mega, Giga, Tera, Peta, Exa, Zetta, Yotta, Mole, Candela, Ampere, Weber, Kibi, Mebi, Gibi, Tebi, Pebi, Exbi, Meter, AU, Inch, Feet, Yard, Mile, NauticalMile, LightYear, Parsec, Coulomb, Gram, Tonne, Dram, Ounce, Pound, Farad, Second, Minute, Hour, Day, Month, Year, Compound;
+export Unit, Newton, Joule, Ohm, Hertz, Volt, Kelvin, Celsius, Fahrenheit, Hectare, Tesla, Bit, Byte, Siemens, Watt, Liter, CubicInch, CubicFeet, CubicYard, Pint, Quart, Gallon, Pascal, Henry, Yocto, Zepto, Atto, Femto, Pico, Nano, Micro, Milli, Centi, Deci, Hecto, Kilo, Mega, Giga, Tera, Peta, Exa, Zetta, Yotta, Mole, Candela, Ampere, Weber, Packet, Kibi, Mebi, Gibi, Tebi, Pebi, Exbi, Meter, AU, Inch, Feet, Yard, Mile, NauticalMile, LightYear, Parsec, Coulomb, Gram, Tonne, Dram, Ounce, Pound, Farad, Second, Minute, Hour, Day, Month, Year, Compound;
 export canonical_unit, is_modifier, unit_type, unit_abrev, si_modifiers, binary_modifiers;	// these are really internal items
 
 /// Simple units are specified with one of the constructors (e.g. Meter).
@@ -91,6 +91,9 @@ enum Unit
 	
 	// magnetic_flux
 	Weber,
+	
+	// packets
+	Packet,
 	
 	// binary_modifiers
 	Kibi,
@@ -204,6 +207,9 @@ pure fn canonical_unit(u: Unit) -> (float, float, @[Unit], @[Unit])
 		// magnetic_flux
 		Weber			=> (0.0, 1.0, @[Kilo,Gram,Meter,Meter], @[Second,Second,Ampere]),
 		
+		// packets
+		Packet			=> (0.0, 1.0, @[Packet], @[]),
+		
 		// length
 		Meter			=> (0.0, 1.0, @[Meter], @[]),
 		AU			=> (0.0, 1.49597870691e11, @[Meter], @[]),
@@ -303,6 +309,7 @@ pure fn unit_type(u: Unit) -> ~str
 		Candela => ~"luminous_intensity",
 		Ampere => ~"electric_current",
 		Weber => ~"magnetic_flux",
+		Packet => ~"packets",
 		Kibi | Mebi | Gibi | Tebi | Pebi | Exbi => ~"",
 		Meter | AU | Inch | Feet | Yard | Mile | NauticalMile | LightYear | Parsec => ~"length",
 		Coulomb => ~"electric_charge",
@@ -400,6 +407,9 @@ pure fn unit_abrev(u: Unit) -> ~str
 		
 		// magnetic_flux
 		Weber		=> ~"Wb",
+		
+		// packets
+		Packet		=> ~"p",
 		
 		// binary_modifiers
 		Kibi		=> ~"Ki",
