@@ -25,7 +25,7 @@ bandwidth should use the SI Prefixes.
 Value
 --------
 Value is a struct with a float and a Unit. It supports all the usual operators, allows Values
-to be converted from one (comaptible) unit to another, and provides normalize functions
+to be converted from one (compatible) unit to another, and provides normalize functions
 which add prefixes like Kilo or Milli in order to make the value nice.
 
 Invalid operations (e.g. adding a length to a time) cause the task to fail.
