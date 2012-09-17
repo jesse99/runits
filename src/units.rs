@@ -284,11 +284,11 @@ impl  Value : ToStr
 	{
 		if self.units.is_not_dimensionless()
 		{
-			fmt!("%.f %s", self.value, self.units.to_str())
+			fmt!("%f %s", self.value, self.units.to_str())
 		}
 		else
 		{
-			fmt!("%.f", self.value)
+			fmt!("%f", self.value)
 		}
 	}
 }
@@ -973,4 +973,19 @@ fn test_normalize_time()
 	let x = from_units(33.0, Day).normalize_time();
 	assert check_floats(x.value, 1.084211);
 	assert check_units(x.units, Month);
+}
+
+// From the README
+#[test]
+fn test_usage()
+{
+	let speed = from_units(30.0, Mile/Hour);
+	let delta = from_units(2.0, Meter/Second);
+	let sum = speed + delta;   // for binary ops the rhs is converted to the lhs units
+	
+	let sum = sum.convert_to(Kilo*Meter/Second);
+	info!("speed1 = %s", sum.to_str()); // prints "0.015411 km/s"
+	
+	let sum = sum.normalize_si();
+	info!("speed2 = %s", sum.to_str()); // prints "15.411200 m/s"
 }
