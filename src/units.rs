@@ -982,6 +982,7 @@ fn test_usage()
 	let speed = from_units(30.0, Mile/Hour);
 	let delta = from_units(2.0, Meter/Second);
 	let sum = speed + delta;   // for binary ops the rhs is converted to the lhs units
+	info!("sum = %s", sum.to_str()); // prints "34.473873 mi/h"
 	
 	let sum = sum.convert_to(Kilo*Meter/Second);
 	info!("speed1 = %s", sum.to_str()); // prints "0.015411 km/s"
