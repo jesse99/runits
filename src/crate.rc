@@ -5,15 +5,12 @@
 #[author = "Jesse Jones"];
 #[license = "MIT"];
 
-#[warn(non_camel_case_types)]; 
-#[warn(implicit_copies)];
-#[warn(non_implicitly_copyable_typarams)];
-#[warn(deprecated_pattern)];
+#[allow(structural_records)];
 #[warn(unused_imports)];
-#[allow(deprecated_mode)];			// TODO: enable this
-#[allow(structural_records)];			// TODO: enable this
+#[allow(deprecated_mode)];
+#[allow(deprecated_pattern)];	// TODO: enable this
 
-use std;
+extern mod std;
  
 mod generated;
 mod units;

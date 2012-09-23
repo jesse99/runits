@@ -1,12 +1,9 @@
 // DO NOT EDIT: generated from units.in using gen_units.py
-export Unit, Newton, Joule, Ohm, Hertz, Volt, Kelvin, Celsius, Fahrenheit, Hectare, Tesla, Bit, Byte, Siemens, Watt, Liter, CubicInch, CubicFeet, CubicYard, Pint, Quart, Gallon, Pascal, Henry, Yocto, Zepto, Atto, Femto, Pico, Nano, Micro, Milli, Centi, Deci, Hecto, Kilo, Mega, Giga, Tera, Peta, Exa, Zetta, Yotta, Mole, Candela, Ampere, Weber, Packet, Kibi, Mebi, Gibi, Tebi, Pebi, Exbi, Meter, AU, Inch, Feet, Yard, Mile, NauticalMile, LightYear, Parsec, Coulomb, Gram, Tonne, Dram, Ounce, Pound, Farad, Second, Minute, Hour, Day, Month, Year, Compound;
-export canonical_unit, is_modifier, unit_type, unit_abrev, si_modifiers, binary_modifiers;	// these are really internal items
-
 /// Simple units are specified with one of the constructors (e.g. Meter).
 /// Compound units are constructed using multiplication and division
 /// (e.g. Meter/(Second*Second)). Dimensionless units are empty Compound
 /// units.
-enum Unit
+pub enum Unit
 {
 	// force
 	Newton,
@@ -140,7 +137,7 @@ enum Unit
 }
 
 // Returns (offset, scaling, numer, denom).
-pure fn canonical_unit(u: Unit) -> (float, float, @[Unit], @[Unit])
+pub pure fn canonical_unit(u: Unit) -> (float, float, @[Unit], @[Unit])
 {
 	match u
 	{
@@ -276,7 +273,7 @@ pure fn canonical_unit(u: Unit) -> (float, float, @[Unit], @[Unit])
 	}
 }
 
-pure fn is_modifier(u: Unit) -> bool
+pub pure fn is_modifier(u: Unit) -> bool
 {
 	match u
 	{
@@ -286,7 +283,7 @@ pure fn is_modifier(u: Unit) -> bool
 	}
 }
 
-pure fn unit_type(u: Unit) -> ~str
+pub pure fn unit_type(u: Unit) -> ~str
 {
 	match u
 	{
@@ -320,7 +317,7 @@ pure fn unit_type(u: Unit) -> ~str
 	}
 }
 
-pure fn unit_abrev(u: Unit) -> ~str
+pub pure fn unit_abrev(u: Unit) -> ~str
 {
 	match u
 	{
@@ -456,7 +453,7 @@ pure fn unit_abrev(u: Unit) -> ~str
 	}
 }
 
-pure fn si_modifiers(f: pure fn (Unit) -> bool)
+pub pure fn si_modifiers(f: pure fn (Unit) -> bool)
 {
 	if !f(Yocto) {return;}
 	if !f(Zepto) {return;}
@@ -479,7 +476,7 @@ pure fn si_modifiers(f: pure fn (Unit) -> bool)
 	if !f(Yotta) {return;}
 }
 
-pure fn binary_modifiers(f: pure fn (Unit) -> bool)
+pub pure fn binary_modifiers(f: pure fn (Unit) -> bool)
 {
 	if !f(Kibi) {return;}
 	if !f(Mebi) {return;}

@@ -1,9 +1,8 @@
+// Last compiled with rust 6b670c306b8de545afcbcea81bcd592c644409d7
 use io::WriterUtil;
 use std::map::*;
 use core::ops::*;
 use generated::*;
-
-export Value, from_number, from_units;
 
 // ---- Unit ----------------------------------------------------------------------------
 impl Unit
@@ -26,7 +25,7 @@ impl Unit
 /// For binary ops the rhs is converted to the units of the lhs.
 impl Unit : ops::Mul<Unit, Unit>
 {
-	pure fn mul(rhs: Unit) -> Unit
+	pure fn mul(&&rhs: Unit) -> Unit
 	{
 		let (numer1, denom1) = to_compound(self);
 		let (numer2, denom2) = to_compound(rhs);
@@ -36,7 +35,7 @@ impl Unit : ops::Mul<Unit, Unit>
 
 impl Unit : ops::Div<Unit, Unit>
 {
-	pure fn div(rhs: Unit) -> Unit
+	pure fn div(&&rhs: Unit) -> Unit
 	{
 		let (numer1, denom1) = to_compound(self);
 		let (numer2, denom2) = to_compound(rhs);
@@ -70,19 +69,19 @@ impl Unit : cmp::Eq
 /// Values are numbers represented in an arbitrary unit. They support
 /// the standard arithmetic operations and fail is called if the units are
 /// incompatible (e.g. if meters are added to seconds).
-struct Value
+pub struct Value
 {
 	pub value: float,
 	pub units: Unit,		// public so users have more control over stuff like to_str
 }
 
 /// Creates a dimensionless value.
-pure fn from_number(value: float) -> Value
+pub pure fn from_number(value: float) -> Value
 {
 	Value {value: value, units: Compound(@[], @[])}
 }
 
-pure fn from_units(value: float, units: Unit) -> Value
+pub pure fn from_units(value: float, units: Unit) -> Value
 {
 	match units
 	{
@@ -186,7 +185,7 @@ impl Value
 
 impl Value : ops::Mul<Value, Value>
 {
-	pure fn mul(rhs: Value) -> Value
+	pure fn mul(&&rhs: Value) -> Value
 	{
 		Value {value: self.value * rhs.value, units: self.units*rhs.units}
 	}
@@ -194,7 +193,7 @@ impl Value : ops::Mul<Value, Value>
 
 impl Value : ops::Div<Value, Value>
 {
-	pure fn div(rhs: Value) -> Value
+	pure fn div(&&rhs: Value) -> Value
 	{
 		Value {value: self.value / rhs.value, units: self.units/rhs.units}
 	}
@@ -203,7 +202,7 @@ impl Value : ops::Div<Value, Value>
 // Modulus is lhs - (rhs * int(lhs/rhs)) so units is left unchanged.
 impl Value : ops::Modulo<Value, Value>
 {
-	pure fn modulo(rhs: Value) -> Value
+	pure fn modulo(&&rhs: Value) -> Value
 	{
 		let rhs = convert_to(rhs, self.units, ~"modulo");
 		Value {value: self.value % rhs.value, units: self.units}
@@ -212,7 +211,7 @@ impl Value : ops::Modulo<Value, Value>
 
 impl Value : ops::Add<Value, Value>
 {
-	pure fn add(rhs: Value) -> Value
+	pure fn add(&&rhs: Value) -> Value
 	{
 		let rhs = convert_to(rhs, self.units, ~"add");
 		Value {value: self.value + rhs.value, units: self.units}
@@ -221,7 +220,7 @@ impl Value : ops::Add<Value, Value>
 
 impl Value : ops::Sub<Value, Value>
 {
-	pure fn sub(rhs: Value) -> Value
+	pure fn sub(&&rhs: Value) -> Value
 	{
 		let rhs = convert_to(rhs, self.units, ~"sub");
 		Value {value: self.value - rhs.value, units: self.units}
@@ -336,9 +335,9 @@ fn do_units_to_str(unit: Unit) -> ~str
 					}
 					else if !is_modifier(original[i-1])
 					{
-						unchecked {str::push_str(result, ~"*");}
+						unsafe {str::push_str(result, ~"*");}
 					}
-					unchecked {str::push_str(result, ss)};
+					unsafe {str::push_str(result, ss)};
 				}
 			}
 			result
@@ -450,10 +449,10 @@ pure fn cancel_units(numer: @[Unit], denom: @[Unit]) -> Unit
 	for numer.each
 	|u|
 	{
-		match denom.position_elem(u)
+		match denom.position_elem(*u)
 		{
 			option::Some(i)	=> rdenom = box_remove_at(rdenom, i),
-			option::None		=> rnumer += @[u],
+			option::None		=> rnumer += @[*u],
 		}
 	}
 	
@@ -483,7 +482,7 @@ pure fn to_canonical(x: Value) -> Value
 	for numer.each
 	|u|
 	{
-		let (offset, scaling, n, d) = canonical_unit(u);
+		let (offset, scaling, n, d) = canonical_unit(*u);
 		rvalue = (rvalue + offset)*scaling;
 		rnumer += n;
 		rdenom += d;
@@ -492,7 +491,7 @@ pure fn to_canonical(x: Value) -> Value
 	for denom.each
 	|u|
 	{
-		let (offset, scaling, n, d) = canonical_unit(u);
+		let (offset, scaling, n, d) = canonical_unit(*u);
 		rvalue = rvalue*(1.0/scaling) - offset;
 		rnumer += d;
 		rdenom += n;
@@ -517,17 +516,17 @@ pure fn from_canonical(x: float, u: Unit) -> Value
 	for numer.each
 	|u|
 	{
-		let (offset, scaling, _n, _d) = canonical_unit(u);
+		let (offset, scaling, _n, _d) = canonical_unit(*u);
 		rvalue = rvalue*(1.0/scaling) - offset;
-		rnumer += @[u];
+		rnumer += @[*u];
 	}
 	
 	for denom.each
 	|u|
 	{
-		let (offset, scaling, _n, _d) = canonical_unit(u);
+		let (offset, scaling, _n, _d) = canonical_unit(*u);
 		rvalue = (rvalue + offset)*scaling;
-		rdenom += @[u];
+		rdenom += @[*u];
 	}
 	
 	from_units(rvalue, Compound(rnumer, rdenom))
@@ -536,9 +535,9 @@ pure fn from_canonical(x: float, u: Unit) -> Value
 // Fails if the unit kinds are different.
 pure fn check_commensurable(lhs: Value, rhs: Unit, fname: &str)
 {
-	fn increment_type(numer: hashmap<@~str, uint>, denom: hashmap<@~str, uint>, u: Unit)
+	fn increment_type(numer: HashMap<@~str, uint>, denom: HashMap<@~str, uint>, u: Unit)
 	{
-		fn increment(table: hashmap<@~str, uint>, u: Unit)
+		fn increment(table: HashMap<@~str, uint>, u: Unit)
 		{
 			let key = @unit_type(u);
 			if key.is_not_empty()
@@ -555,26 +554,27 @@ pure fn check_commensurable(lhs: Value, rhs: Unit, fname: &str)
 		{
 			Compound(n, d)	=>
 			{
-				for n.each |v| {increment(numer, v)}
-				for d.each |v| {increment(denom, v)}
+				for n.each |v| {increment(numer, *v)}
+				for d.each |v| {increment(denom, *v)}
 			}
 			_ => {increment(numer, u)}
 		}
 	}
 	
-	unchecked
+	unsafe
 	{
-		let numer1 = box_str_hash();
-		let denom1 = box_str_hash();
+		let numer1 = HashMap();
+		let denom1 = HashMap();
 		let lhs2 = to_canonical(lhs);
 		increment_type(numer1, denom1, lhs2.units);
 		
-		let numer2 = box_str_hash();
-		let denom2 = box_str_hash();
+		let numer2 = HashMap();
+		let denom2 = HashMap();
 		let rhs2 = to_canonical(from_units(1.0, rhs));
 		increment_type(numer2, denom2, rhs2.units);
 		
-		if numer1 != numer2 || denom1 != denom2
+		// TODO: don't use to_str
+		if numer1.to_str() != numer2.to_str() || denom1.to_str() != denom2.to_str()
 		{
 			if str::eq_slice(fname, ~"convert_to")
 			{
@@ -599,14 +599,14 @@ pure fn remove_modifiers(x: Value) -> Value
 		for uu.each
 		|u|
 		{
-			if is_modifier(u)
+			if is_modifier(*u)
 			{
-				let (_offset, s, _numer, _denom) = canonical_unit(u);
+				let (_offset, s, _numer, _denom) = canonical_unit(*u);
 				scaling *= s;
 			}
 			else
 			{
-				units += @[u];
+				units += @[*u];
 			}
 		}
 		

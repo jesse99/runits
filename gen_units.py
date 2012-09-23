@@ -123,7 +123,6 @@ class WriteOutput(object):
 		try:
 			with open(options.dst, 'w') as f:
 				self.__write_header(f)
-				self.__write_exports(f)
 				self.__write_enum(f)
 				self.__write_canonical_unit(f)
 				self.__write_is_modifier(f)
@@ -140,21 +139,12 @@ class WriteOutput(object):
 	def __write_header(self, f):
 		f.write('// DO NOT EDIT: generated from %s using gen_units.py\n' % options.src)
 	
-	def __write_exports(self, f):
-		f.write('export Unit')
-		for units in self.__data.values():
-			for unit in units:
-				f.write(', %s' % unit.name)
-		f.write(', Compound;\n')
-		f.write('export canonical_unit, is_modifier, unit_type, unit_abrev, si_modifiers, binary_modifiers;	// these are really internal items\n')
-		f.write('\n')
-	
 	def __write_enum(self, f):
 		f.write('/// Simple units are specified with one of the constructors (e.g. Meter).\n')
 		f.write('/// Compound units are constructed using multiplication and division\n')
 		f.write('/// (e.g. Meter/(Second*Second)). Dimensionless units are empty Compound\n')
 		f.write('/// units.\n')
-		f.write('enum Unit\n')
+		f.write('pub enum Unit\n')
 		f.write('{\n')
 		for kind, units in self.__data.items():
 			f.write('	// %s\n' % kind)
@@ -168,7 +158,7 @@ class WriteOutput(object):
 	def __write_canonical_unit(self, f):
 		f.write('\n')
 		f.write('// Returns (offset, scaling, numer, denom).\n')
-		f.write('pure fn canonical_unit(u: Unit) -> (float, float, @[Unit], @[Unit])\n')
+		f.write('pub pure fn canonical_unit(u: Unit) -> (float, float, @[Unit], @[Unit])\n')
 		f.write('{\n')
 		f.write('	match u\n')
 		f.write('	{\n')
@@ -208,7 +198,7 @@ class WriteOutput(object):
 	
 	def __write_is_modifier(self, f):
 		f.write('\n')
-		f.write('pure fn is_modifier(u: Unit) -> bool\n')
+		f.write('pub pure fn is_modifier(u: Unit) -> bool\n')
 		f.write('{\n')
 		f.write('	match u\n')
 		f.write('	{\n')
@@ -220,7 +210,7 @@ class WriteOutput(object):
 	
 	def __write_unit_type(self, f):
 		f.write('\n')
-		f.write('pure fn unit_type(u: Unit) -> ~str\n')
+		f.write('pub pure fn unit_type(u: Unit) -> ~str\n')
 		f.write('{\n')
 		f.write('	match u\n')
 		f.write('	{\n')
@@ -236,7 +226,7 @@ class WriteOutput(object):
 	
 	def __write_unit_abrev(self, f):
 		f.write('\n')
-		f.write('pure fn unit_abrev(u: Unit) -> ~str\n')
+		f.write('pub pure fn unit_abrev(u: Unit) -> ~str\n')
 		f.write('{\n')
 		f.write('	match u\n')
 		f.write('	{\n')
@@ -252,7 +242,7 @@ class WriteOutput(object):
 	
 	def __write_si_modifiers(self, f):
 		f.write('\n')
-		f.write('pure fn si_modifiers(f: pure fn (Unit) -> bool)\n')
+		f.write('pub pure fn si_modifiers(f: pure fn (Unit) -> bool)\n')
 		f.write('{\n')
 		for unit in self.__data['si_modifiers']:
 			f.write('	if !f(%s) {return;}\n' % unit.name)
@@ -260,7 +250,7 @@ class WriteOutput(object):
 	
 	def __write_binary_modifiers(self, f):
 		f.write('\n')
-		f.write('pure fn binary_modifiers(f: pure fn (Unit) -> bool)\n')
+		f.write('pub pure fn binary_modifiers(f: pure fn (Unit) -> bool)\n')
 		f.write('{\n')
 		for unit in self.__data['binary_modifiers']:
 			f.write('	if !f(%s) {return;}\n' % unit.name)
