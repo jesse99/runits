@@ -532,6 +532,33 @@ pure fn from_canonical(x: float, u: Unit) -> Value
 	from_units(rvalue, Compound(rnumer, rdenom))
 }
 
+fn hash_equals(lhs: HashMap<@~str, uint>, rhs: HashMap<@~str, uint>) -> bool
+{
+	if lhs.size() == rhs.size()
+	{
+		for lhs.each
+		|key, value1|
+		{
+			match rhs.find(key)
+			{
+				option::Some(value2) =>
+				{
+					if value1 != value2
+					{
+						return false;
+					}
+				}
+				option::None =>
+				{
+					return false;
+				}
+			}
+		}
+	}
+	
+	true
+}
+
 // Fails if the unit kinds are different.
 pure fn check_commensurable(lhs: Value, rhs: Unit, fname: &str)
 {
@@ -574,7 +601,7 @@ pure fn check_commensurable(lhs: Value, rhs: Unit, fname: &str)
 		increment_type(numer2, denom2, rhs2.units);
 		
 		// TODO: don't use to_str
-		if numer1.to_str() != numer2.to_str() || denom1.to_str() != denom2.to_str()
+		if !hash_equals(numer1, numer2) || !hash_equals(denom1, denom2)
 		{
 			if str::eq_slice(fname, ~"convert_to")
 			{
