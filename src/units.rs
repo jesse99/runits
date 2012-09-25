@@ -293,7 +293,7 @@ impl  Value : ToStr
 }
 
 // ---- Internal Items ------------------------------------------------------------------
-fn do_units_to_str(unit: Unit) -> ~str
+priv fn do_units_to_str(unit: Unit) -> ~str
 {
 	// Bit of an icky function: converts stuff like ["m", "s", "m"] to "m^2*s".
 	fn units_to_str(original: @[Unit], units: &[~str], invert: bool) -> ~str
@@ -387,7 +387,7 @@ fn do_units_to_str(unit: Unit) -> ~str
 	}
 }
 
-pure fn apply_modifier(x: Value, u: Unit) -> Value
+priv pure fn apply_modifier(x: Value, u: Unit) -> Value
 {
 	let (_offset, scaling, _numer, _denom) = canonical_unit(u);
 	Value
@@ -402,7 +402,7 @@ pure fn apply_modifier(x: Value, u: Unit) -> Value
 	}
 }
 
-pure fn convert_to(value: Value, to: Unit, fname: ~str) -> Value
+priv pure fn convert_to(value: Value, to: Unit, fname: ~str) -> Value
 {
 	if value.units == to
 	{
@@ -416,7 +416,7 @@ pure fn convert_to(value: Value, to: Unit, fname: ~str) -> Value
 	}
 }
 
-pure fn to_compound(unit: Unit) -> (@[Unit], @[Unit])
+priv pure fn to_compound(unit: Unit) -> (@[Unit], @[Unit])
 {
 	match unit
 	{
@@ -425,7 +425,7 @@ pure fn to_compound(unit: Unit) -> (@[Unit], @[Unit])
 	}
 }
 
-pure fn cancel_units(numer: @[Unit], denom: @[Unit]) -> Unit
+priv pure fn cancel_units(numer: @[Unit], denom: @[Unit]) -> Unit
 {
 	pure fn box_remove_at<T: Copy>(v: @[T], index: uint) -> @[T]
 	{
@@ -466,7 +466,7 @@ pure fn cancel_units(numer: @[Unit], denom: @[Unit]) -> Unit
 	}
 }
 
-pure fn to_canonical(x: Value) -> Value
+priv pure fn to_canonical(x: Value) -> Value
 {
 	let mut rvalue = x.value;
 	let mut rnumer = @[];
@@ -500,7 +500,7 @@ pure fn to_canonical(x: Value) -> Value
 	from_units(rvalue, Compound(rnumer, rdenom))
 }
 
-pure fn from_canonical(x: float, u: Unit) -> Value
+priv pure fn from_canonical(x: float, u: Unit) -> Value
 {
 	let mut rvalue = x;
 	let mut rnumer = @[];
@@ -532,7 +532,7 @@ pure fn from_canonical(x: float, u: Unit) -> Value
 	from_units(rvalue, Compound(rnumer, rdenom))
 }
 
-fn hash_equals(lhs: HashMap<@~str, uint>, rhs: HashMap<@~str, uint>) -> bool
+priv fn hash_equals(lhs: HashMap<@~str, uint>, rhs: HashMap<@~str, uint>) -> bool
 {
 	if lhs.size() == rhs.size()
 	{
@@ -560,7 +560,7 @@ fn hash_equals(lhs: HashMap<@~str, uint>, rhs: HashMap<@~str, uint>) -> bool
 }
 
 // Fails if the unit kinds are different.
-pure fn check_commensurable(lhs: Value, rhs: Unit, fname: &str)
+priv  pure fn check_commensurable(lhs: Value, rhs: Unit, fname: &str)
 {
 	fn increment_type(numer: HashMap<@~str, uint>, denom: HashMap<@~str, uint>, u: Unit)
 	{
@@ -616,7 +616,7 @@ pure fn check_commensurable(lhs: Value, rhs: Unit, fname: &str)
 	}
 }
 
-pure fn remove_modifiers(x: Value) -> Value
+priv pure fn remove_modifiers(x: Value) -> Value
 {
 	pure fn remove(uu: @[Unit]) -> (float, @[Unit])
 	{
