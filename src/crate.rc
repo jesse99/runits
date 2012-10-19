@@ -14,7 +14,7 @@
 
 extern mod std;
  
-mod generated;
-mod units;
+pub mod generated;
+pub mod units;
 
 // TODO: figure out how to re-export items so that clients can simply use the runits module
