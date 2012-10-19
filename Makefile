@@ -23,8 +23,8 @@ clean:
 src/generated.rs: units.in gen_units.py
 	./gen_units.py --in=units.in --out=src/generated.rs
 
-bin/runits: src/crate.rc src/*.rs
+bin/runits: src/runits.rc src/*.rs
 	rustc -o $@ $<
 
-bin/test-runits: src/crate.rc src/*.rs
+bin/test-runits: src/runits.rc src/*.rs
 	rustc --test -o $@ $<
