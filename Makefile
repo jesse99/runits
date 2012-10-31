@@ -13,7 +13,7 @@ check1: bin/test-runits
 	export RUST_LOG=runits=2 && ./bin/test-runits units::test_div_unit
 
 install:
-	install -p `find bin -name "librunits*" -type f -maxdepth 1` /usr/local/lib/rust
+	install -p `find bin -maxdepth 1 -name "librunits*" -type f` /usr/local/lib/rust
 
 clean:
 	rm -rf bin
