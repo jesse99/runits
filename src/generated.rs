@@ -3,6 +3,7 @@
 /// Compound units are constructed using multiplication and division
 /// (e.g. Meter/(Second*Second)). Dimensionless units are empty Compound
 /// units.
+#[deriving_eq]
 pub enum Unit
 {
 	// force

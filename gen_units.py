@@ -144,6 +144,7 @@ class WriteOutput(object):
 		f.write('/// Compound units are constructed using multiplication and division\n')
 		f.write('/// (e.g. Meter/(Second*Second)). Dimensionless units are empty Compound\n')
 		f.write('/// units.\n')
+		f.write('#[deriving_eq]\n')
 		f.write('pub enum Unit\n')
 		f.write('{\n')
 		for kind, units in self.__data.items():

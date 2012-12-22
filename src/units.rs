@@ -1,4 +1,4 @@
-// Last compiled with rust 6b670c306b8de545afcbcea81bcd592c644409d7
+// Last compiled with rust 8b98e5a296d95c5e832db0756828e5bec31c6f50 (0.5)
 use io::WriterUtil;
 use std::map::*;
 use core::ops::*;
@@ -25,20 +25,20 @@ pub impl Unit
 /// For binary ops the rhs is converted to the units of the lhs.
 pub impl Unit : ops::Mul<Unit, Unit>
 {
-	pure fn mul(rhs: &Unit) -> Unit
+	pure fn mul(&self, rhs: &Unit) -> Unit
 	{
 		let (numer1, denom1) = to_compound(self);
-		let (numer2, denom2) = to_compound(*rhs);
+		let (numer2, denom2) = to_compound(rhs);
 		cancel_units(numer1 + numer2, denom1 + denom2)
 	}
 }
 
 pub impl Unit : ops::Div<Unit, Unit>
 {
-	pure fn div(rhs: &Unit) -> Unit
+	pure fn div(&self, rhs: &Unit) -> Unit
 	{
 		let (numer1, denom1) = to_compound(self);
-		let (numer2, denom2) = to_compound(*rhs);
+		let (numer2, denom2) = to_compound(rhs);
 		cancel_units(numer1 + denom2, denom1 + numer2)	// division is multiply by reciprocal
 	}
 }
@@ -51,24 +51,11 @@ pub impl  Unit : ToStr
 	}
 }
 
-// TODO: This is hopefully temporary: at some point rust should again be able to compare enums without assistence.
-pub impl Unit : cmp::Eq
-{
-	pure fn eq(rhs: &Unit) -> bool
-	{
-		fmt!("%?", self) == fmt!("%?", *rhs)
-	}
-	
-	pure fn ne(rhs: &Unit) -> bool
-	{
-		fmt!("%?", self) != fmt!("%?", *rhs)
-	}
-}
-
 // ---- Value ---------------------------------------------------------------------------
 /// Values are numbers represented in an arbitrary unit. They support
 /// the standard arithmetic operations and fail is called if the units are
 /// incompatible (e.g. if meters are added to seconds).
+#[deriving_eq]
 pub struct Value
 {
 	pub value: float,
@@ -185,7 +172,7 @@ pub impl Value
 
 pub impl Value : ops::Mul<Value, Value>
 {
-	pure fn mul(rhs: &Value) -> Value
+	pure fn mul(&self, rhs: &Value) -> Value
 	{
 		Value {value: self.value * rhs.value, units: self.units*rhs.units}
 	}
@@ -193,7 +180,7 @@ pub impl Value : ops::Mul<Value, Value>
 
 pub impl Value : ops::Div<Value, Value>
 {
-	pure fn div(rhs: &Value) -> Value
+	pure fn div(&self, rhs: &Value) -> Value
 	{
 		Value {value: self.value / rhs.value, units: self.units/rhs.units}
 	}
@@ -202,7 +189,7 @@ pub impl Value : ops::Div<Value, Value>
 // Modulus is lhs - (rhs * int(lhs/rhs)) so units is left unchanged.
 pub impl Value : ops::Modulo<Value, Value>
 {
-	pure fn modulo(rhs: &Value) -> Value
+	pure fn modulo(&self, rhs: &Value) -> Value
 	{
 		let rhs = convert_to(*rhs, self.units, ~"modulo");
 		Value {value: self.value % rhs.value, units: self.units}
@@ -211,7 +198,7 @@ pub impl Value : ops::Modulo<Value, Value>
 
 pub impl Value : ops::Add<Value, Value>
 {
-	pure fn add(rhs: &Value) -> Value
+	pure fn add(&self, rhs: &Value) -> Value
 	{
 		let rhs = convert_to(*rhs, self.units, ~"add");
 		Value {value: self.value + rhs.value, units: self.units}
@@ -220,7 +207,7 @@ pub impl Value : ops::Add<Value, Value>
 
 pub impl Value : ops::Sub<Value, Value>
 {
-	pure fn sub(rhs: &Value) -> Value
+	pure fn sub(&self, rhs: &Value) -> Value
 	{
 		let rhs = convert_to(*rhs, self.units, ~"sub");
 		Value {value: self.value - rhs.value, units: self.units}
@@ -229,7 +216,7 @@ pub impl Value : ops::Sub<Value, Value>
 
 pub impl Value : ops::Neg<Value>
 {
-	pure fn neg() -> Value
+	pure fn neg(&self) -> Value
 	{
 		Value {value: -self.value, units: self.units}
 	}
@@ -237,43 +224,28 @@ pub impl Value : ops::Neg<Value>
 
 pub impl Value : cmp::Ord
 {
-	pure fn lt(rhs: &Value) -> bool
+	pure fn lt(&self, rhs: &Value) -> bool
 	{
 		let rhs = convert_to(*rhs, self.units, ~"lt");
 		self.value < rhs.value
 	}
 	
-	pure fn le(rhs: &Value) -> bool
+	pure fn le(&self, rhs: &Value) -> bool
 	{
 		let rhs = convert_to(*rhs, self.units, ~"le");
 		self.value <= rhs.value
 	}
 	
-	pure fn ge(rhs: &Value) -> bool
+	pure fn ge(&self, rhs: &Value) -> bool
 	{
 		let rhs = convert_to(*rhs, self.units, ~"ge");
 		self.value >= rhs.value
 	}
 	
-	pure fn gt(rhs: &Value) -> bool
+	pure fn gt(&self, rhs: &Value) -> bool
 	{
 		let rhs = convert_to(*rhs, self.units, ~"gt");
 		self.value > rhs.value
-	}
-}
-
-pub impl Value : cmp::Eq
-{
-	pure fn eq(rhs: &Value) -> bool
-	{
-		let rhs = convert_to(*rhs, self.units, ~"eq");
-		self.value == rhs.value
-	}
-	
-	pure fn ne(rhs: &Value) -> bool
-	{
-		let rhs = convert_to(*rhs, self.units, ~"ne");
-		self.value != rhs.value
 	}
 }
 
@@ -349,7 +321,7 @@ priv pure fn do_units_to_str(unit: Unit) -> ~str
 			match power_count(units, i)
 			{
 				0	=> ~"",
-				1	=> if invert {fmt!("%s^-1", *u)} else {u.to_unique()},
+				1	=> if invert {fmt!("%s^-1", *u)} else {u.to_owned()},
 				n	=> fmt!("%s^%?", *u, if invert {-n} else {n}),
 			}
 		};
@@ -416,9 +388,9 @@ priv pure fn convert_to(value: Value, to: Unit, fname: ~str) -> Value
 	}
 }
 
-priv pure fn to_compound(unit: Unit) -> (@[Unit], @[Unit])
+priv pure fn to_compound(unit: &Unit) -> (@[Unit], @[Unit])
 {
-	match unit
+	match *unit
 	{
 		Compound(n, d)	=> (n, d),
 		u					=> (@[u], @[]),
