@@ -5,12 +5,14 @@
 #[author = "Jesse Jones"];
 #[license = "MIT"];
 
+#[allow(structural_records)];	// TODO: think some compiler generated code is tripping this
+#[allow(deprecated_mode)];	// TODO: can't quite enable this yet
+
 #[forbid(unused_imports)];
 #[forbid(implicit_copies)];
 #[forbid(deprecated_pattern)];
 #[forbid(non_implicitly_copyable_typarams)];
-#[allow(structural_records)];	// TODO: think some compiler generated code is tripping this
-#[allow(deprecated_mode)];	// TODO: can't quite enable this yet
+#[forbid(deprecated_pattern)];
 
 extern mod std;
  
